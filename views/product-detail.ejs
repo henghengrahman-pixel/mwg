@@ -1,88 +1,247 @@
 <!DOCTYPE html>
+
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
-  <%- include("partials/header") %>
 
-  <section class="section container product-detail-page">
-    <div class="product-gallery">
-      <div class="main-media">
-        <% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
-        <img id="mainPreview" src="<%= mediaImages[0] || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>" alt="<%= product.name %>" />
-      </div>
+<%- include("partials/header") %>
 
-      <% if ((product.images && product.images.length > 1) || (product.videos && product.videos.length)) { %>
-        <div class="thumb-list">
-          <% mediaImages.forEach(img => { %>
-            <button type="button" class="thumb-btn" onclick="changePreview('<%= img %>', 'image')">
-              <img src="<%= img %>" alt="<%= product.name %>">
-            </button>
-          <% }) %>
+<section class="section container product-detail-page">
 
-          <% (product.videos || []).forEach(video => { %>
-            <button type="button" class="thumb-btn video-thumb" onclick="changePreview('<%= video %>', 'video')">
-              <span>VIDEO</span>
-            </button>
-          <% }) %>
-        </div>
-      <% } %>
-    </div>
+<div class="product-gallery">
 
-    <div class="product-info">
-      <span class="pill"><%= product.category || 'Produk' %></span>
-      <h1><%= product.name %></h1>
-      <p class="price big"><%= formatRupiah(product.price) %></p>
+<div class="main-media">
+<% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
 
-      <div class="product-description">
-        <h3>Deskripsi Produk</h3>
-        <p><%= product.desc || 'Belum ada deskripsi.' %></p>
-      </div>
+<img id="mainPreview"
+src="<%= mediaImages[0] || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
+alt="<%= product.name %>"
+loading="lazy"
+/>
 
-      <% if (product.affiliateUrl) { %>
-        <a class="btn primary" target="_blank" rel="nofollow sponsored" href="/go/<%= product.id %>">
-          Beli Sekarang
-        </a>
-      <% } %>
-    </div>
-  </section>
+</div>
 
-  <section class="section container">
-    <div class="section-head">
-      <h2>Produk Terkait</h2>
-    </div>
+<% if ((product.images && product.images.length > 1) || (product.videos && product.videos.length)) { %>
 
-    <div class="grid-products">
-      <% related.forEach(item => { %>
-        <article class="card">
-          <a href="/produk/<%= item.slug %>">
-            <img src="<%= (item.images && item.images.length ? item.images[0] : item.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>" alt="<%= item.name %>" />
-            <h3><%= item.name %></h3>
-          </a>
-          <p class="price"><%= formatRupiah(item.price) %></p>
-          <a class="btn primary full" href="/produk/<%= item.slug %>">Lihat Produk</a>
-        </article>
-      <% }) %>
-    </div>
-  </section>
+<div class="thumb-list">
 
-  <script>
-    function changePreview(src, type) {
-      const container = document.querySelector(".main-media");
-      if (!container) return;
+<% mediaImages.forEach(img => { %>
 
-      if (type === "video") {
-        container.innerHTML = `
-          <video controls playsinline style="width:100%; border-radius:16px;">
-            <source src="${src}">
-            Browser tidak mendukung video.
-          </video>
-        `;
-      } else {
-        container.innerHTML = `<img id="mainPreview" src="${src}" alt="Preview Produk" />`;
-      }
-    }
-  </script>
+<button type="button"
+class="thumb-btn"
+onclick="changePreview('<%= img %>', 'image')">
 
-  <%- include("partials/footer") %>
+<img src="<%= img %>" alt="<%= product.name %>" loading="lazy">
+
+</button>
+
+<% }) %>
+
+<% (product.videos || []).forEach(video => { %>
+
+<button
+type="button"
+class="thumb-btn video-thumb"
+onclick="changePreview('<%= video %>', 'video')">
+
+<span>VIDEO</span>
+
+</button>
+
+<% }) %>
+
+</div>
+
+<% } %>
+
+</div>
+
+<div class="product-info">
+
+<span class="pill"><%= product.category || 'Produk Pilihan' %></span>
+
+<h1><%= product.name %></h1>
+
+<p class="price big"><%= formatRupiah(product.price) %></p>
+
+<% if(product.shortDesc){ %>
+
+<p class="short-desc">
+<%= product.shortDesc %>
+</p>
+
+<% } %>
+
+<div class="product-description">
+
+<h3>Deskripsi Produk</h3>
+
+<p><%= product.desc || 'Produk ini direkomendasikan karena kualitasnya baik dan banyak digunakan.' %></p>
+
+</div>
+
+<% if(product.benefits && product.benefits.length){ %>
+
+<div class="product-benefits">
+
+<h3>Kelebihan Produk</h3>
+
+<ul>
+
+<% product.benefits.forEach(b=>{ %>
+
+<li><%= b %></li>
+
+<% }) %>
+
+</ul>
+
+</div>
+
+<% } %>
+
+<% if(product.specs && product.specs.length){ %>
+
+<div class="product-specs">
+
+<h3>Spesifikasi</h3>
+
+<ul>
+
+<% product.specs.forEach(s=>{ %>
+
+<li><%= s %></li>
+
+<% }) %>
+
+</ul>
+
+</div>
+
+<% } %>
+
+<% if (product.affiliateUrl) { %>
+
+<a
+class="btn primary"
+target="_blank"
+rel="nofollow sponsored"
+href="/go/<%= product.id %>">
+
+Lihat Detail Produk
+
+</a>
+
+<% } %>
+
+</div>
+
+</section>
+
+<section class="section container">
+
+<div class="section-head">
+<h2>Produk Rekomendasi Lain</h2>
+</div>
+
+<div class="grid-products">
+
+<% related.forEach(item => { %>
+
+<article class="card">
+
+<a href="/produk/<%= item.slug %>">
+
+<img
+src="<%= (item.images && item.images.length ? item.images[0] : item.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
+alt="<%= item.name %>"
+loading="lazy"
+/>
+
+<h3><%= item.name %></h3>
+
+</a>
+
+<p class="price"><%= formatRupiah(item.price) %></p>
+
+<a
+class="btn primary full"
+href="/produk/<%= item.slug %>">
+
+Lihat Produk
+
+</a>
+
+</article>
+
+<% }) %>
+
+</div>
+
+</section>
+
+<script>
+
+function changePreview(src, type){
+
+const container=document.querySelector(".main-media")
+
+if(!container)return
+
+
+if(type==="video"){
+
+container.innerHTML=`
+<video controls playsinline style="width:100%;border-radius:16px;">
+<source src="${src}">
+Browser tidak mendukung video
+</video>
+`
+
+}else{
+
+container.innerHTML=`
+<img id="mainPreview"
+src="${src}"
+alt="Preview Produk"
+/>
+`
+
+}
+
+}
+
+</script>
+
+<script type="application/ld+json">
+
+{
+"@context":"https://schema.org",
+"@type":"Product",
+"name":"<%= product.name %>",
+"image":[
+<% mediaImages.forEach((img,i)=>{ %>
+"<%= img %>"<%= i<mediaImages.length-1 ? "," : "" %>
+<% }) %>
+],
+"description":"<%= product.desc || product.shortDesc || product.name %>",
+"brand":{
+"@type":"Brand",
+"name":"Teman Belanja"
+},
+"offers":{
+"@type":"Offer",
+"priceCurrency":"IDR",
+"price":"<%= product.price %>",
+"availability":"https://schema.org/InStock",
+"url":"<%= BASE_URL %>/produk/<%= product.slug %>"
+}
+}
+
+</script>
+
+<%- include("partials/footer") %>
+
 </body>
 </html>
