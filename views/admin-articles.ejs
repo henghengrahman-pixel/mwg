@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container">
+    <div class="section-head">
+      <h1>Kelola Artikel SEO</h1>
+      <a href="/admin/articles/new" class="btn primary">+ Tulis Artikel</a>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Judul</th>
+          <th>Slug</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% articles.forEach(article => { %>
+          <tr>
+            <td><%= article.title %></td>
+            <td><%= article.slug %></td>
+            <td><%= new Date(article.createdAt).toLocaleDateString('id-ID') %></td>
+            <td>
+              <a href="/admin/articles/edit/<%= article.id %>">Edit</a> |
+              <a href="/admin/articles/delete/<%= article.id %>" onclick="return confirm('Hapus artikel ini?')">Hapus</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
