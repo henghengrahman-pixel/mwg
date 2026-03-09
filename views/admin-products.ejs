@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container">
+    <div class="section-head">
+      <h1>Kelola Produk Affiliate</h1>
+      <a href="/admin/products/new" class="btn primary">+ Tambah Produk</a>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Gambar</th>
+          <th>Nama</th>
+          <th>Harga</th>
+          <th>Kategori</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach(product => { %>
+          <tr>
+            <td><img src="<%= product.image %>" alt="<%= product.name %>" style="width:70px;"></td>
+            <td><%= product.name %></td>
+            <td><%= formatRupiah(product.price) %></td>
+            <td><%= product.category %></td>
+            <td>
+              <a href="/admin/products/edit/<%= product.id %>">Edit</a> |
+              <a href="/admin/products/delete/<%= product.id %>" onclick="return confirm('Hapus produk ini?')">Hapus</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
