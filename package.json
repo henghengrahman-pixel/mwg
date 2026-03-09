@@ -1,11 +1,15 @@
 {
   "name": "teman-belanja",
   "version": "1.0.0",
-  "description": "Website affiliate Teman Belanja",
+  "description": "Website rekomendasi produk dan artikel Teman Belanja",
   "main": "app.js",
+  "private": true,
   "scripts": {
     "start": "node app.js",
-    "dev": "node app.js"
+    "dev": "nodemon app.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "ejs": "^3.1.10",
@@ -13,5 +17,8 @@
     "express-session": "^1.18.1",
     "multer": "^2.0.0",
     "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
