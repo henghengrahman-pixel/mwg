@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container">
+    <div class="admin-box">
+      <h1><%= product ? "Edit Produk" : "Tambah Produk" %></h1>
+
+      <form method="post" enctype="multipart/form-data">
+        <div style="margin-bottom:14px;">
+          <label>Nama Produk</label>
+          <input type="text" name="name" value="<%= product?.name || '' %>" required>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Harga</label>
+          <input type="number" name="price" value="<%= product?.price || '' %>" required>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Kategori</label>
+          <input type="text" name="category" value="<%= product?.category || '' %>" placeholder="Misal: Fashion, Beauty, Elektronik">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Deskripsi</label>
+          <textarea name="desc" rows="4"><%= product?.desc || '' %></textarea>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Link Affiliate Shopee</label>
+          <input type="url" name="affiliateUrl" value="<%= product?.affiliateUrl || '' %>" placeholder="https://shopee....">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Upload Gambar</label>
+          <input type="file" name="imageFile" accept="image/*">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Atau Link Gambar</label>
+          <input type="text" name="image" value="<%= product?.image || '' %>">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Meta Title SEO</label>
+          <input type="text" name="metaTitle" value="<%= product?.metaTitle || '' %>">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Meta Description SEO</label>
+          <textarea name="metaDescription" rows="3"><%= product?.metaDescription || '' %></textarea>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label><input type="checkbox" name="isFeatured" <%= product?.isFeatured ? 'checked' : '' %>> Produk unggulan</label>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label><input type="checkbox" name="active" <%= product ? (product.active ? 'checked' : '') : 'checked' %>> Aktif</label>
+        </div>
+
+        <button type="submit" class="btn primary full">Simpan Produk</button>
+      </form>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
