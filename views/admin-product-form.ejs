@@ -1,72 +1,184 @@
 <!DOCTYPE html>
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
-  <%- include("partials/header") %>
+<%- include("partials/header") %>
 
-  <section class="section container">
-    <div class="admin-box">
-      <h1><%= product ? "Edit Produk" : "Tambah Produk" %></h1>
+<section class="section container">
 
-      <form method="post" enctype="multipart/form-data">
-        <div style="margin-bottom:14px;">
-          <label>Nama Produk</label>
-          <input type="text" name="name" value="<%= product?.name || '' %>" required>
-        </div>
+<div class="admin-box">
+<h1><%= product ? "Edit Produk" : "Tambah Produk" %></h1>
 
-        <div style="margin-bottom:14px;">
-          <label>Harga</label>
-          <input type="number" name="price" value="<%= product?.price || '' %>" required>
-        </div>
+<form method="post" enctype="multipart/form-data">
 
-        <div style="margin-bottom:14px;">
-          <label>Kategori</label>
-          <input type="text" name="category" value="<%= product?.category || '' %>" placeholder="Misal: Fashion, Beauty, Elektronik">
-        </div>
+<!-- NAMA -->
+<div class="form-group">
+<label>Nama Produk</label>
+<input type="text" name="name" value="<%= product?.name || '' %>" required>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Deskripsi</label>
-          <textarea name="desc" rows="4"><%= product?.desc || '' %></textarea>
-        </div>
+<!-- HARGA -->
+<div class="form-group">
+<label>Harga</label>
+<input type="number" name="price" value="<%= product?.price || '' %>" required>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Link Affiliate Shopee</label>
-          <input type="url" name="affiliateUrl" value="<%= product?.affiliateUrl || '' %>" placeholder="https://shopee....">
-        </div>
+<!-- KATEGORI -->
+<div class="form-group">
+<label>Kategori</label>
+<input type="text" name="category" value="<%= product?.category || '' %>" placeholder="Fashion, Elektronik, Rumah Tangga">
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Upload Gambar</label>
-          <input type="file" name="imageFile" accept="image/*">
-        </div>
+<!-- SHORT DESC -->
+<div class="form-group">
+<label>Deskripsi Singkat</label>
+<textarea name="shortDesc" rows="2"><%= product?.shortDesc || '' %></textarea>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Atau Link Gambar</label>
-          <input type="text" name="image" value="<%= product?.image || '' %>">
-        </div>
+<!-- DESKRIPSI -->
+<div class="form-group">
+<label>Deskripsi Lengkap</label>
+<textarea name="desc" rows="6"><%= product?.desc || '' %></textarea>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Meta Title SEO</label>
-          <input type="text" name="metaTitle" value="<%= product?.metaTitle || '' %>">
-        </div>
+<!-- KEYWORD -->
+<div class="form-group">
+<label>Keyword Utama SEO</label>
+<input type="text" name="focusKeyword" value="<%= product?.focusKeyword || '' %>" placeholder="tas wanita elegan">
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label>Meta Description SEO</label>
-          <textarea name="metaDescription" rows="3"><%= product?.metaDescription || '' %></textarea>
-        </div>
+<!-- KELEBIHAN -->
+<div class="form-group">
+<label>Kelebihan Produk (1 baris = 1 poin)</label>
+<textarea name="benefits" rows="4"><%= product?.benefits?.join('\n') || '' %></textarea>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label><input type="checkbox" name="isFeatured" <%= product?.isFeatured ? 'checked' : '' %>> Produk unggulan</label>
-        </div>
+<!-- SPESIFIKASI -->
+<div class="form-group">
+<label>Spesifikasi Produk</label>
+<textarea name="specs" rows="4"><%= product?.specs?.join('\n') || '' %></textarea>
+</div>
 
-        <div style="margin-bottom:14px;">
-          <label><input type="checkbox" name="active" <%= product ? (product.active ? 'checked' : '') : 'checked' %>> Aktif</label>
-        </div>
+<!-- LINK PRODUK -->
+<div class="form-group">
+<label>Link Produk</label>
+<input type="url" name="affiliateUrl" value="<%= product?.affiliateUrl || '' %>" placeholder="https://...">
+</div>
 
-        <button type="submit" class="btn primary full">Simpan Produk</button>
-      </form>
-    </div>
-  </section>
+<!-- SOURCE URL -->
+<div class="form-group">
+<label>Source URL (opsional)</label>
+<input type="url" name="sourceUrl" value="<%= product?.sourceUrl || '' %>">
+</div>
 
-  <%- include("partials/footer") %>
+<hr>
+
+<h3>Upload Foto Produk</h3>
+
+<div class="form-group">
+<label>Upload Foto (maksimal 7)</label>
+<input type="file" name="imageFiles" accept="image/*" multiple>
+</div>
+
+<div class="form-group">
+<label>Link Foto (1 baris = 1 foto)</label>
+<textarea name="imageLinks" rows="4"></textarea>
+</div>
+
+<% if(product?.images?.length){ %>
+<div class="form-group">
+<label>Foto Saat Ini</label>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+
+<% product.images.forEach(img=>{ %>
+<img src="<%= img %>" style="width:100%;border-radius:8px;">
+<% }) %>
+
+</div>
+
+<label style="margin-top:10px;">
+<input type="checkbox" name="keepOldImages" checked>
+Pertahankan foto lama
+</label>
+
+</div>
+<% } %>
+
+<hr>
+
+<h3>Video Produk</h3>
+
+<div class="form-group">
+<label>Upload Video</label>
+<input type="file" name="videoFiles" accept="video/*" multiple>
+</div>
+
+<div class="form-group">
+<label>Link Video</label>
+<textarea name="videoLinks" rows="3"></textarea>
+</div>
+
+<% if(product?.videos?.length){ %>
+<div class="form-group">
+
+<label>Video Saat Ini</label>
+
+<% product.videos.forEach(v=>{ %>
+
+<video src="<%= v %>" controls style="width:200px"></video>
+
+<% }) %>
+
+<label style="margin-top:10px;">
+<input type="checkbox" name="keepOldVideos" checked>
+Pertahankan video lama
+</label>
+
+</div>
+<% } %>
+
+<hr>
+
+<h3>SEO</h3>
+
+<div class="form-group">
+<label>Meta Title</label>
+<input type="text" name="metaTitle" value="<%= product?.metaTitle || '' %>">
+</div>
+
+<div class="form-group">
+<label>Meta Description</label>
+<textarea name="metaDescription" rows="3"><%= product?.metaDescription || '' %></textarea>
+</div>
+
+<hr>
+
+<div class="form-group">
+<label>
+<input type="checkbox" name="isFeatured" <%= product?.isFeatured ? 'checked' : '' %>>
+Produk Unggulan
+</label>
+</div>
+
+<div class="form-group">
+<label>
+<input type="checkbox" name="active"
+<%= product ? (product.active ? 'checked' : '') : 'checked' %>>
+Aktif
+</label>
+</div>
+
+<button type="submit" class="btn primary full">
+Simpan Produk
+</button>
+
+</form>
+</div>
+
+</section>
+
+<%- include("partials/footer") %>
 </body>
 </html>
