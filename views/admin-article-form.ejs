@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container">
+    <div class="admin-box">
+      <h1><%= article ? "Edit Artikel" : "Tulis Artikel Baru" %></h1>
+
+      <form method="post" enctype="multipart/form-data">
+        <div style="margin-bottom:14px;">
+          <label>Judul Artikel</label>
+          <input type="text" name="title" value="<%= article?.title || '' %>" required>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Excerpt / Ringkasan</label>
+          <textarea name="excerpt" rows="3"><%= article?.excerpt || '' %></textarea>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Isi Artikel</label>
+          <textarea name="content" rows="14" required><%= article?.content || '' %></textarea>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Keyword SEO</label>
+          <input type="text" name="keywords" value="<%= article?.keywords || '' %>" placeholder="misal: rekomendasi tas wanita, tas murah bagus">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Upload Cover</label>
+          <input type="file" name="coverFile" accept="image/*">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Atau Link Cover</label>
+          <input type="text" name="cover" value="<%= article?.cover || '' %>">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Meta Title</label>
+          <input type="text" name="metaTitle" value="<%= article?.metaTitle || '' %>">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label>Meta Description</label>
+          <textarea name="metaDescription" rows="3"><%= article?.metaDescription || '' %></textarea>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label><input type="checkbox" name="active" <%= article ? (article.active ? 'checked' : '') : 'checked' %>> Publish</label>
+        </div>
+
+        <button type="submit" class="btn primary full">Simpan Artikel</button>
+      </form>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
