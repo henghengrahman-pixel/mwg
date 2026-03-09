@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="hero">
+    <div class="container hero-wrap">
+      <div>
+        <span class="badge">Affiliate Store & SEO Article</span>
+        <h1>Teman Belanja</h1>
+        <p>Tempat cari rekomendasi produk, promo, review, dan artikel belanja yang mudah ditemukan di Google.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="/produk">Lihat Produk</a>
+          <a class="btn ghost" href="/artikel">Baca Artikel</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="section-head">
+      <h2>Produk Pilihan</h2>
+      <a href="/produk">Lihat semua</a>
+    </div>
+    <div class="grid-products">
+      <% products.slice(0, 8).forEach(product => { %>
+        <article class="card">
+          <a href="/produk/<%= product.slug %>">
+            <img src="<%= product.image %>" alt="<%= product.name %>" />
+            <h3><%= product.name %></h3>
+          </a>
+          <p class="price"><%= formatRupiah(product.price) %></p>
+          <p class="desc"><%= product.desc %></p>
+          <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Detail</a>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="section-head">
+      <h2>Artikel Terbaru</h2>
+      <a href="/artikel">Lihat semua</a>
+    </div>
+    <div class="grid-articles">
+      <% articles.forEach(article => { %>
+        <article class="card article-card">
+          <a href="/artikel/<%= article.slug %>">
+            <img src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>" alt="<%= article.title %>" />
+            <h3><%= article.title %></h3>
+          </a>
+          <p><%= article.excerpt %></p>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
