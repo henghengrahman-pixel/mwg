@@ -1,29 +1,83 @@
 <!DOCTYPE html>
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
   <%- include("partials/header") %>
 
   <section class="section container">
-    <h1>Produk Pilihan</h1>
+    <div class="page-head">
+      <span class="pill">Rekomendasi Pilihan</span>
+      <h1>Rekomendasi Barang Bagus</h1>
+      <p class="page-lead">
+        Temukan berbagai rekomendasi barang bagus untuk kebutuhan harian, rumah tangga,
+        fashion, dan kategori lainnya. Kami merangkum produk pilihan yang layak dilihat
+        berdasarkan fungsi, tampilan, dan nilai pakainya.
+      </p>
+    </div>
 
-    <form class="searchbar" method="get">
-      <input type="text" name="q" placeholder="Cari produk..." value="<%= q %>" />
+    <form class="searchbar" method="get" action="/produk">
+      <input
+        type="text"
+        name="q"
+        placeholder="Cari produk bagus..."
+        value="<%= q || '' %>"
+        aria-label="Cari produk"
+      />
       <button type="submit" class="btn primary">Cari</button>
     </form>
 
-    <div class="grid-products">
-      <% products.forEach(product => { %>
-        <article class="card product-card">
-          <a href="/produk/<%= product.slug %>">
-            <img src="<%= (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>" alt="<%= product.name %>" />
-            <h3><%= product.name %></h3>
-          </a>
-          <p class="price"><%= formatRupiah(product.price) %></p>
-          <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Produk</a>
-        </article>
-      <% }) %>
-    </div>
+    <% if (q) { %>
+      <div class="search-info">
+        <p>Hasil pencarian untuk: <strong><%= q %></strong></p>
+      </div>
+    <% } %>
+
+    <% if (products && products.length) { %>
+      <div class="grid-products">
+        <% products.forEach(product => { %>
+          <% const coverImage = (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
+
+          <article class="card product-card">
+            <a href="/produk/<%= product.slug %>" class="product-link">
+              <div class="product-thumb-wrap">
+                <img
+                  src="<%= coverImage %>"
+                  alt="<%= product.name %>"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="product-card-body">
+                <% if (product.category) { %>
+                  <span class="mini-category"><%= product.category %></span>
+                <% } %>
+
+                <h3><%= product.name %></h3>
+
+                <% if (product.shortDesc) { %>
+                  <p class="product-short"><%= product.shortDesc %></p>
+                <% } %>
+
+                <p class="price"><%= formatRupiah(product.price) %></p>
+              </div>
+            </a>
+
+            <a class="btn primary full" href="/produk/<%= product.slug %>">
+              Lihat Produk
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state card">
+        <h2>Belum ada produk</h2>
+        <p>
+          Produk belum tersedia atau kata kunci yang kamu cari belum ditemukan.
+          Coba gunakan kata kunci lain yang lebih singkat.
+        </p>
+      </div>
+    <% } %>
   </section>
 
   <%- include("partials/footer") %>
