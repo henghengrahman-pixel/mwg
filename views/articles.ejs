@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container">
+    <h1>Artikel Teman Belanja</h1>
+    <form class="searchbar" method="get">
+      <input type="text" name="q" placeholder="Cari artikel..." value="<%= q %>" />
+      <button type="submit" class="btn primary">Cari</button>
+    </form>
+
+    <div class="grid-articles">
+      <% articles.forEach(article => { %>
+        <article class="card article-card">
+          <a href="/artikel/<%= article.slug %>">
+            <img src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Artikel+Teman+Belanja' %>" alt="<%= article.title %>" />
+            <h3><%= article.title %></h3>
+          </a>
+          <p><%= article.excerpt %></p>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
