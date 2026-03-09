@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <section class="section container product-detail">
+    <div class="product-image">
+      <img src="<%= product.image %>" alt="<%= product.name %>" />
+    </div>
+    <div class="product-info">
+      <span class="pill"><%= product.category %></span>
+      <h1><%= product.name %></h1>
+      <p class="price big"><%= formatRupiah(product.price) %></p>
+      <p><%= product.desc %></p>
+
+      <% if (product.affiliateUrl) { %>
+        <a class="btn primary" target="_blank" rel="nofollow sponsored" href="<%= product.affiliateUrl %>">
+          Beli Sekarang
+        </a>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="section-head"><h2>Produk Terkait</h2></div>
+    <div class="grid-products">
+      <% related.forEach(item => { %>
+        <article class="card">
+          <a href="/produk/<%= item.slug %>">
+            <img src="<%= item.image %>" alt="<%= item.name %>" />
+            <h3><%= item.name %></h3>
+          </a>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
