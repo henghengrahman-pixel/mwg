@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+<body>
+  <%- include("partials/header") %>
+
+  <article class="section container article-detail">
+    <h1><%= article.title %></h1>
+    <% if (article.cover) { %>
+      <img class="article-cover" src="<%= article.cover %>" alt="<%= article.title %>" />
+    <% } %>
+    <p class="excerpt"><%= article.excerpt %></p>
+    <div class="content"><%- article.content.replace(/\n/g, "<br>") %></div>
+  </article>
+
+  <section class="section container">
+    <div class="section-head"><h2>Artikel Terkait</h2></div>
+    <div class="grid-articles">
+      <% related.forEach(item => { %>
+        <article class="card article-card">
+          <a href="/artikel/<%= item.slug %>">
+            <img src="<%= item.cover || 'https://via.placeholder.com/800x450?text=Artikel' %>" alt="<%= item.title %>" />
+            <h3><%= item.title %></h3>
+          </a>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
