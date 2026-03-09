@@ -17,10 +17,14 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
 const BASE_URL = process.env.BASE_URL || "https://temanbelanja.com";
 const SESSION_SECRET = process.env.SESSION_SECRET || "teman-belanja-secret";
 
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
+// penting untuk Railway volume
+const DATA_DIR = process.env.DATA_DIR || "/data";
+
 const PUBLIC_DIR = path.join(__dirname, "public");
 const VIEWS_DIR = path.join(__dirname, "views");
-const UPLOAD_DIR = path.join(PUBLIC_DIR, "uploads");
+
+// upload disimpan ke volume, bukan ke folder project
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 
 const PRODUCTS_FILE = path.join(DATA_DIR, "products.json");
 const ARTICLES_FILE = path.join(DATA_DIR, "articles.json");
@@ -57,8 +61,13 @@ app.set("views", VIEWS_DIR);
 app.disable("x-powered-by");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
+
+// static normal
 app.use(express.static(PUBLIC_DIR));
+
+// static upload dari volume
+app.use("/uploads", express.static(UPLOAD_DIR));
 
 app.use(
   session({
@@ -82,7 +91,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname || "").toLowerCase();
-    const safeExt = ext || ".jpg";
+    const safeExt = ext || ".bin";
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExt}`);
   }
 });
@@ -90,14 +99,26 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024
+    fileSize: 50 * 1024 * 1024
   },
   fileFilter: function (req, file, cb) {
-    const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg", "image/gif"];
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/jpg",
+      "image/gif",
+      "video/mp4",
+      "video/webm",
+      "video/ogg",
+      "video/quicktime"
+    ];
+
     if (allowed.includes(file.mimetype)) {
       return cb(null, true);
     }
-    return cb(new Error("File harus berupa gambar JPG, PNG, WEBP, atau GIF"));
+
+    return cb(new Error("File harus berupa JPG, PNG, WEBP, GIF, MP4, WEBM, OGG, atau MOV"));
   }
 });
 
@@ -134,7 +155,8 @@ function makeSlug(text) {
 }
 
 function uniqueSlug(baseSlug, existingItems, currentId = null) {
-  let slug = baseSlug || `item-${Date.now()}`;
+  const initial = baseSlug || `item-${Date.now()}`;
+  let slug = initial;
   let counter = 1;
 
   while (
@@ -142,7 +164,7 @@ function uniqueSlug(baseSlug, existingItems, currentId = null) {
       (item) => item.slug === slug && String(item.id) !== String(currentId || "")
     )
   ) {
-    slug = `${baseSlug}-${counter}`;
+    slug = `${initial}-${counter}`;
     counter++;
   }
 
@@ -161,7 +183,9 @@ function seoTitle(title) {
 
 function seoDescription(text, max = 160) {
   const cleaned = String(text || "").replace(/\s+/g, " ").trim();
-  if (!cleaned) return "Teman Belanja berisi rekomendasi produk, artikel SEO, review, promo, dan link affiliate pilihan.";
+  if (!cleaned) {
+    return "Teman Belanja berisi rekomendasi produk, artikel SEO, review, promo, dan link affiliate pilihan.";
+  }
   return cleaned.length > max ? `${cleaned.slice(0, max - 3)}...` : cleaned;
 }
 
@@ -173,23 +197,48 @@ function boolFromForm(value) {
   return value === "on" || value === "true" || value === true;
 }
 
+function splitLinesToArray(value) {
+  return String(value || "")
+    .split("\n")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function normalizeUrlArray(arr) {
+  return (Array.isArray(arr) ? arr : [])
+    .map((v) => safeText(v))
+    .filter(Boolean);
+}
+
 function getProducts() {
   const products = readJson(PRODUCTS_FILE, []);
-  return products.map((item) => ({
-    ...item,
-    name: safeText(item.name),
-    slug: safeText(item.slug),
-    price: Number(item.price || 0),
-    category: safeText(item.category),
-    desc: safeText(item.desc),
-    image: safeText(item.image),
-    affiliateUrl: safeText(item.affiliateUrl),
-    metaTitle: safeText(item.metaTitle),
-    metaDescription: safeText(item.metaDescription),
-    isFeatured: !!item.isFeatured,
-    active: item.active !== false,
-    createdAt: item.createdAt || new Date().toISOString()
-  }));
+  return products.map((item) => {
+    const images = Array.isArray(item.images)
+      ? normalizeUrlArray(item.images)
+      : (item.image ? [safeText(item.image)] : []);
+
+    const videos = Array.isArray(item.videos)
+      ? normalizeUrlArray(item.videos)
+      : [];
+
+    return {
+      ...item,
+      name: safeText(item.name),
+      slug: safeText(item.slug),
+      price: Number(item.price || 0),
+      category: safeText(item.category),
+      desc: safeText(item.desc),
+      image: safeText(item.image) || images[0] || "",
+      images,
+      videos,
+      affiliateUrl: safeText(item.affiliateUrl),
+      metaTitle: safeText(item.metaTitle),
+      metaDescription: safeText(item.metaDescription),
+      isFeatured: !!item.isFeatured,
+      active: item.active !== false,
+      createdAt: item.createdAt || new Date().toISOString()
+    };
+  });
 }
 
 function saveProducts(data) {
@@ -238,6 +287,8 @@ function createSeedProducts() {
       category: "Fashion",
       desc: "Tas wanita model elegan yang cocok untuk harian, kerja, dan hangout.",
       image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
+      images: ["https://via.placeholder.com/800x800?text=Teman+Belanja"],
+      videos: [],
       affiliateUrl: "https://shopee.co.id/",
       metaTitle: "Tas Wanita Elegan Premium Murah dan Bagus",
       metaDescription: "Rekomendasi tas wanita elegan premium dengan desain kekinian dan harga terjangkau.",
@@ -253,6 +304,8 @@ function createSeedProducts() {
       category: "Rumah Tangga",
       desc: "Rak serbaguna minimalis untuk dapur, kamar mandi, atau ruang kerja.",
       image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
+      images: ["https://via.placeholder.com/800x800?text=Teman+Belanja"],
+      videos: [],
       affiliateUrl: "https://shopee.co.id/",
       metaTitle: "Rak Serbaguna Minimalis Murah",
       metaDescription: "Rak serbaguna minimalis yang praktis, hemat tempat, dan cocok untuk berbagai ruangan.",
@@ -333,7 +386,7 @@ app.get("/produk", (req, res) => {
 
   if (q) {
     products = products.filter((p) =>
-      [p.name, p.desc, p.category]
+      [p.name, p.category]
         .join(" ")
         .toLowerCase()
         .includes(q)
@@ -350,7 +403,7 @@ app.get("/produk", (req, res) => {
   res.render("products", {
     pageTitle: seoTitle("Produk Pilihan"),
     metaDescription:
-      "Kumpulan produk pilihan di Teman Belanja lengkap dengan link affiliate, review singkat, dan rekomendasi terbaik.",
+      "Kumpulan produk pilihan di Teman Belanja lengkap dengan link affiliate dan rekomendasi terbaik.",
     canonical: `${BASE_URL}/produk`,
     products,
     q
@@ -438,7 +491,7 @@ app.get("/artikel/:slug", (req, res) => {
   });
 });
 
-// redirect affiliate biar link rapi
+// redirect affiliate
 app.get("/go/:id", (req, res) => {
   const product = getProducts().find((p) => p.id === req.params.id && p.active !== false);
 
@@ -474,9 +527,7 @@ app.get("/sitemap.xml", (req, res) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
-  .map((url) => {
-    return `  <url><loc>${url}</loc></url>`;
-  })
+  .map((url) => `  <url><loc>${url}</loc></url>`)
   .join("\n")}
 </urlset>`;
 
@@ -555,41 +606,56 @@ app.get("/admin/products/new", requireAdmin, (req, res) => {
   });
 });
 
-app.post("/admin/products/new", requireAdmin, upload.single("imageFile"), (req, res) => {
-  const products = getProducts();
+app.post(
+  "/admin/products/new",
+  requireAdmin,
+  upload.fields([
+    { name: "imageFiles", maxCount: 10 },
+    { name: "videoFiles", maxCount: 5 }
+  ]),
+  (req, res) => {
+    const products = getProducts();
 
-  const name = safeText(req.body.name);
-  if (!name) {
-    return res.status(400).send("Nama produk wajib diisi");
+    const name = safeText(req.body.name);
+    if (!name) {
+      return res.status(400).send("Nama produk wajib diisi");
+    }
+
+    const uploadedImages = (req.files?.imageFiles || []).map((file) => `/uploads/${file.filename}`);
+    const uploadedVideos = (req.files?.videoFiles || []).map((file) => `/uploads/${file.filename}`);
+
+    const imageLinks = splitLinesToArray(req.body.imageLinks);
+    const videoLinks = splitLinesToArray(req.body.videoLinks);
+
+    const images = [...uploadedImages, ...imageLinks];
+    const videos = [...uploadedVideos, ...videoLinks];
+
+    const baseSlug = makeSlug(name);
+    const slug = uniqueSlug(baseSlug, products);
+
+    const item = {
+      id: crypto.randomUUID(),
+      name,
+      slug,
+      price: Number(req.body.price || 0),
+      category: safeText(req.body.category),
+      desc: safeText(req.body.desc),
+      image: images[0] || "",
+      images,
+      videos,
+      affiliateUrl: safeText(req.body.affiliateUrl),
+      metaTitle: safeText(req.body.metaTitle),
+      metaDescription: safeText(req.body.metaDescription),
+      isFeatured: boolFromForm(req.body.isFeatured),
+      active: boolFromForm(req.body.active),
+      createdAt: new Date().toISOString()
+    };
+
+    products.unshift(item);
+    saveProducts(products);
+    res.redirect("/admin/products");
   }
-
-  const image = req.file
-    ? `/uploads/${req.file.filename}`
-    : safeText(req.body.image);
-
-  const baseSlug = makeSlug(name);
-  const slug = uniqueSlug(baseSlug, products);
-
-  const item = {
-    id: crypto.randomUUID(),
-    name,
-    slug,
-    price: Number(req.body.price || 0),
-    category: safeText(req.body.category),
-    desc: safeText(req.body.desc),
-    image,
-    affiliateUrl: safeText(req.body.affiliateUrl),
-    metaTitle: safeText(req.body.metaTitle),
-    metaDescription: safeText(req.body.metaDescription),
-    isFeatured: boolFromForm(req.body.isFeatured),
-    active: boolFromForm(req.body.active),
-    createdAt: new Date().toISOString()
-  };
-
-  products.unshift(item);
-  saveProducts(products);
-  res.redirect("/admin/products");
-});
+);
 
 app.get("/admin/products/edit/:id", requireAdmin, (req, res) => {
   const product = getProducts().find((p) => p.id === req.params.id);
@@ -606,46 +672,79 @@ app.get("/admin/products/edit/:id", requireAdmin, (req, res) => {
   });
 });
 
-app.post("/admin/products/edit/:id", requireAdmin, upload.single("imageFile"), (req, res) => {
-  const products = getProducts();
-  const index = products.findIndex((p) => p.id === req.params.id);
+app.post(
+  "/admin/products/edit/:id",
+  requireAdmin,
+  upload.fields([
+    { name: "imageFiles", maxCount: 10 },
+    { name: "videoFiles", maxCount: 5 }
+  ]),
+  (req, res) => {
+    const products = getProducts();
+    const index = products.findIndex((p) => p.id === req.params.id);
 
-  if (index === -1) {
-    return res.status(404).send("Produk tidak ditemukan");
+    if (index === -1) {
+      return res.status(404).send("Produk tidak ditemukan");
+    }
+
+    const old = products[index];
+    const name = safeText(req.body.name);
+
+    if (!name) {
+      return res.status(400).send("Nama produk wajib diisi");
+    }
+
+    const uploadedImages = (req.files?.imageFiles || []).map((file) => `/uploads/${file.filename}`);
+    const uploadedVideos = (req.files?.videoFiles || []).map((file) => `/uploads/${file.filename}`);
+
+    const imageLinks = splitLinesToArray(req.body.imageLinks);
+    const videoLinks = splitLinesToArray(req.body.videoLinks);
+
+    const keepOldImages = req.body.keepOldImages === undefined ? true : boolFromForm(req.body.keepOldImages);
+    const keepOldVideos = req.body.keepOldVideos === undefined ? true : boolFromForm(req.body.keepOldVideos);
+
+    const oldImages = Array.isArray(old.images)
+      ? old.images
+      : (old.image ? [old.image] : []);
+
+    const oldVideos = Array.isArray(old.videos) ? old.videos : [];
+
+    const images = [
+      ...(keepOldImages ? oldImages : []),
+      ...uploadedImages,
+      ...imageLinks
+    ].filter(Boolean);
+
+    const videos = [
+      ...(keepOldVideos ? oldVideos : []),
+      ...uploadedVideos,
+      ...videoLinks
+    ].filter(Boolean);
+
+    const baseSlug = makeSlug(name);
+    const slug = uniqueSlug(baseSlug, products, old.id);
+
+    products[index] = {
+      ...old,
+      name,
+      slug,
+      price: Number(req.body.price || 0),
+      category: safeText(req.body.category),
+      desc: safeText(req.body.desc),
+      image: images[0] || "",
+      images,
+      videos,
+      affiliateUrl: safeText(req.body.affiliateUrl),
+      metaTitle: safeText(req.body.metaTitle),
+      metaDescription: safeText(req.body.metaDescription),
+      isFeatured: boolFromForm(req.body.isFeatured),
+      active: boolFromForm(req.body.active)
+    };
+
+    saveProducts(products);
+    res.redirect("/admin/products");
   }
-
-  const old = products[index];
-  const name = safeText(req.body.name);
-
-  if (!name) {
-    return res.status(400).send("Nama produk wajib diisi");
-  }
-
-  const image = req.file
-    ? `/uploads/${req.file.filename}`
-    : safeText(req.body.image) || old.image;
-
-  const baseSlug = makeSlug(name);
-  const slug = uniqueSlug(baseSlug, products, old.id);
-
-  products[index] = {
-    ...old,
-    name,
-    slug,
-    price: Number(req.body.price || 0),
-    category: safeText(req.body.category),
-    desc: safeText(req.body.desc),
-    image,
-    affiliateUrl: safeText(req.body.affiliateUrl),
-    metaTitle: safeText(req.body.metaTitle),
-    metaDescription: safeText(req.body.metaDescription),
-    isFeatured: boolFromForm(req.body.isFeatured),
-    active: boolFromForm(req.body.active)
-  };
-
-  saveProducts(products);
-  res.redirect("/admin/products");
-});
+);
 
 app.get("/admin/products/delete/:id", requireAdmin, (req, res) => {
   const products = getProducts();
@@ -826,4 +925,5 @@ app.listen(PORT, () => {
   console.log(`Teman Belanja running on port ${PORT}`);
   console.log(`Admin login ID: ${ADMIN_ID}`);
   console.log(`Data dir: ${DATA_DIR}`);
+  console.log(`Upload dir: ${UPLOAD_DIR}`);
 });
