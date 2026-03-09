@@ -1,61 +1,185 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <%- include("partials/head") %>
+
 <body>
-  <%- include("partials/header") %>
 
-  <section class="hero">
-    <div class="container hero-wrap">
-      <div>
-        <span class="badge">Affiliate Store & SEO Article</span>
-        <h1>Teman Belanja</h1>
-        <p>Tempat cari rekomendasi produk, promo, review, dan artikel belanja yang mudah ditemukan di Google.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="/produk">Lihat Produk</a>
-          <a class="btn ghost" href="/artikel">Baca Artikel</a>
-        </div>
+<%- include("partials/header") %>
+
+<section class="hero">
+  <div class="container hero-wrap">
+
+    <div class="hero-content">
+
+      <span class="badge">Rekomendasi Produk & Tips Belanja</span>
+
+      <h1>Teman Belanja</h1>
+
+      <p class="hero-desc">
+        Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
+        review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
+        harian, rumah tangga, fashion, dan lainnya.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
+        <a class="btn ghost" href="/artikel">Baca Artikel</a>
       </div>
-    </div>
-  </section>
 
-  <section class="section container">
-    <div class="section-head">
-      <h2>Produk Pilihan</h2>
-      <a href="/produk">Lihat semua</a>
     </div>
-    <div class="grid-products">
-      <% products.slice(0, 8).forEach(product => { %>
-        <article class="card">
-          <a href="/produk/<%= product.slug %>">
-            <img src="<%= product.image %>" alt="<%= product.name %>" />
-            <h3><%= product.name %></h3>
-          </a>
-          <p class="price"><%= formatRupiah(product.price) %></p>
-          <p class="desc"><%= product.desc %></p>
-          <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Detail</a>
-        </article>
-      <% }) %>
-    </div>
-  </section>
 
-  <section class="section container">
-    <div class="section-head">
-      <h2>Artikel Terbaru</h2>
-      <a href="/artikel">Lihat semua</a>
-    </div>
-    <div class="grid-articles">
-      <% articles.forEach(article => { %>
-        <article class="card article-card">
-          <a href="/artikel/<%= article.slug %>">
-            <img src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>" alt="<%= article.title %>" />
-            <h3><%= article.title %></h3>
-          </a>
-          <p><%= article.excerpt %></p>
-        </article>
-      <% }) %>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <%- include("partials/footer") %>
+
+
+<section class="section container">
+
+<div class="section-head">
+
+<h2>Produk Rekomendasi</h2>
+
+<a href="/produk">Lihat semua</a>
+
+</div>
+
+
+<div class="grid-products">
+
+<% products.slice(0,8).forEach(product => { %>
+
+<% const coverImage =
+(product.images && product.images.length ? product.images[0] : product.image)
+|| 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
+
+
+<article class="card product-card">
+
+<a href="/produk/<%= product.slug %>" class="product-link">
+
+<div class="product-thumb-wrap">
+
+<img
+src="<%= coverImage %>"
+alt="<%= product.name %>"
+loading="lazy"
+/>
+
+</div>
+
+
+<div class="product-card-body">
+
+<% if(product.category){ %>
+<span class="mini-category"><%= product.category %></span>
+<% } %>
+
+
+<h3><%= product.name %></h3>
+
+
+<% if(product.shortDesc){ %>
+<p class="product-short"><%= product.shortDesc %></p>
+<% } %>
+
+
+<p class="price"><%= formatRupiah(product.price) %></p>
+
+</div>
+
+</a>
+
+
+<a
+class="btn primary full"
+href="/produk/<%= product.slug %>">
+
+Lihat Produk
+
+</a>
+
+</article>
+
+<% }) %>
+
+</div>
+
+</section>
+
+
+
+<section class="section container">
+
+<div class="section-head">
+
+<h2>Artikel Terbaru</h2>
+
+<a href="/artikel">Lihat semua</a>
+
+</div>
+
+
+<div class="grid-articles">
+
+<% articles.forEach(article => { %>
+
+<article class="card article-card">
+
+<a href="/artikel/<%= article.slug %>">
+
+<img
+src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
+alt="<%= article.title %>"
+loading="lazy"
+/>
+
+<h3><%= article.title %></h3>
+
+</a>
+
+
+<% if(article.excerpt){ %>
+
+<p><%= article.excerpt %></p>
+
+<% } %>
+
+</article>
+
+<% }) %>
+
+</div>
+
+</section>
+
+
+
+<section class="section container">
+
+<div class="site-info">
+
+<h2>Tentang Teman Belanja</h2>
+
+<p>
+Teman Belanja membantu kamu menemukan berbagai barang menarik
+yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
+pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
+</p>
+
+<p>
+Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
+pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
+dengan lebih mudah.
+</p>
+
+</div>
+
+</section>
+
+
+
+<%- include("partials/footer") %>
+
 </body>
 </html>
