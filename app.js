@@ -11,17 +11,26 @@ const app = express();
 // =========================
 // CONFIG
 // =========================
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_ID = process.env.ADMIN_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
-const BASE_URL = process.env.BASE_URL || "https://temanbelanja.com";
+const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.com").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET || "teman-belanja-secret";
-const DATA_DIR = process.env.DATA_DIR || "/data";
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 const VIEWS_DIR = path.join(__dirname, "views");
-const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 
+// Railway volume preferred. Fallback local kalau /data tidak bisa dipakai.
+let DATA_DIR = process.env.DATA_DIR || "/data";
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (error) {
+  DATA_DIR = path.join(__dirname, "data");
+}
+
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 const PRODUCTS_FILE = path.join(DATA_DIR, "products.json");
 const ARTICLES_FILE = path.join(DATA_DIR, "articles.json");
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
@@ -41,8 +50,9 @@ function ensureFile(filePath, defaultValue = "[]") {
   }
 }
 
-ensureDir(DATA_DIR);
 ensureDir(PUBLIC_DIR);
+ensureDir(VIEWS_DIR);
+ensureDir(DATA_DIR);
 ensureDir(UPLOAD_DIR);
 
 ensureFile(PRODUCTS_FILE, "[]");
@@ -55,6 +65,7 @@ ensureFile(ORDERS_FILE, "[]");
 app.set("view engine", "ejs");
 app.set("views", VIEWS_DIR);
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "20mb" }));
@@ -154,13 +165,6 @@ function splitLinesToArray(value) {
     .filter(Boolean);
 }
 
-function splitCommaToArray(value) {
-  return String(value || "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
 function normalizeUrlArray(arr) {
   return (Array.isArray(arr) ? arr : [])
     .map((v) => safeText(v))
@@ -222,14 +226,13 @@ function firstNonEmpty(...values) {
   return "";
 }
 
-function buildProductSummary(product) {
-  const parts = [
-    safeText(product.desc),
-    Array.isArray(product.benefits) ? product.benefits.join(", ") : "",
-    safeText(product.focusKeyword),
-    safeText(product.category)
-  ].filter(Boolean);
-  return parts.join(" ");
+function escapeXml(text = "") {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 function getProducts() {
@@ -251,9 +254,7 @@ function getProducts() {
       ? item.specs.map((x) => safeText(x)).filter(Boolean)
       : splitLinesToArray(item.specs);
 
-    const faq = Array.isArray(item.faq)
-      ? item.faq
-      : [];
+    const faq = Array.isArray(item.faq) ? item.faq : [];
 
     return {
       ...item,
@@ -273,7 +274,7 @@ function getProducts() {
       focusKeyword: safeText(item.focusKeyword),
       benefits,
       specs,
-      faq: Array.isArray(faq) ? faq : [],
+      faq,
       isFeatured: !!item.isFeatured,
       active: item.active !== false,
       createdAt: item.createdAt || new Date().toISOString(),
@@ -467,6 +468,17 @@ app.locals.BASE_URL = BASE_URL;
 app.locals.formatRupiah = formatRupiah;
 
 // =========================
+// HEALTH CHECK
+// =========================
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "teman-belanja",
+    time: new Date().toISOString()
+  });
+});
+
+// =========================
 // FRONTEND ROUTES
 // =========================
 app.get("/", (req, res) => {
@@ -506,14 +518,7 @@ app.get("/produk", (req, res) => {
 
   if (q) {
     products = products.filter((p) =>
-      [
-        p.name,
-        p.category,
-        p.focusKeyword,
-        p.shortDesc,
-        p.desc,
-        ...(p.benefits || [])
-      ]
+      [p.name, p.category, p.focusKeyword, p.shortDesc, p.desc, ...(p.benefits || [])]
         .join(" ")
         .toLowerCase()
         .includes(q)
@@ -558,7 +563,12 @@ app.get("/produk/:slug", (req, res) => {
   }
 
   const related = products
-    .filter((p) => p.slug !== product.slug && p.active !== false)
+    .filter(
+      (p) =>
+        p.slug !== product.slug &&
+        p.active !== false &&
+        (p.category === product.category || !product.category)
+    )
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 4);
 
@@ -652,7 +662,6 @@ app.get("/artikel/:slug", (req, res) => {
   });
 });
 
-// redirect produk
 app.get("/go/:id", (req, res) => {
   const product = getProducts().find((p) => p.id === req.params.id && p.active !== false);
 
@@ -700,7 +709,7 @@ app.get("/sitemap.xml", (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map((item) => {
-    return `  <url><loc>${item.loc}</loc><lastmod>${item.lastmod}</lastmod></url>`;
+    return `  <url><loc>${escapeXml(item.loc)}</loc><lastmod>${escapeXml(item.lastmod)}</lastmod></url>`;
   })
   .join("\n")}
 </urlset>`;
@@ -802,7 +811,7 @@ app.post(
     const videoLinks = splitLinesToArray(req.body.videoLinks).slice(0, 3);
 
     let images = uniqueArray([...uploadedImages, ...imageLinks]).slice(0, 7);
-    let videos = uniqueArray([...uploadedVideos, ...videoLinks]).slice(0, 3);
+    const videos = uniqueArray([...uploadedVideos, ...videoLinks]).slice(0, 3);
 
     if (images.length === 0) {
       images = ["https://via.placeholder.com/800x800?text=Teman+Belanja"];
@@ -901,7 +910,7 @@ app.post(
       ...imageLinks
     ]).slice(0, 7);
 
-    let videos = uniqueArray([
+    const videos = uniqueArray([
       ...(keepOldVideos ? oldVideos : []),
       ...uploadedVideos,
       ...videoLinks
@@ -982,10 +991,7 @@ app.post("/admin/articles/new", requireAdmin, upload.single("coverFile"), (req, 
     return res.status(400).send("Judul artikel wajib diisi");
   }
 
-  const cover = req.file
-    ? `/uploads/${req.file.filename}`
-    : safeText(req.body.cover);
-
+  const cover = req.file ? `/uploads/${req.file.filename}` : safeText(req.body.cover);
   const baseSlug = makeSlug(title);
   const slug = uniqueSlug(baseSlug, articles);
   const now = new Date().toISOString();
@@ -1040,10 +1046,7 @@ app.post("/admin/articles/edit/:id", requireAdmin, upload.single("coverFile"), (
     return res.status(400).send("Judul artikel wajib diisi");
   }
 
-  const cover = req.file
-    ? `/uploads/${req.file.filename}`
-    : safeText(req.body.cover) || old.cover;
-
+  const cover = req.file ? `/uploads/${req.file.filename}` : safeText(req.body.cover) || old.cover;
   const baseSlug = makeSlug(title);
   const slug = uniqueSlug(baseSlug, articles, old.id);
 
@@ -1126,3 +1129,4 @@ app.listen(PORT, () => {
   console.log(`Data dir: ${DATA_DIR}`);
   console.log(`Upload dir: ${UPLOAD_DIR}`);
 });
+      
