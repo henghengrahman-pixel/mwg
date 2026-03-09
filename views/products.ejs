@@ -6,6 +6,7 @@
 
   <section class="section container">
     <h1>Produk Pilihan</h1>
+
     <form class="searchbar" method="get">
       <input type="text" name="q" placeholder="Cari produk..." value="<%= q %>" />
       <button type="submit" class="btn primary">Cari</button>
@@ -13,14 +14,13 @@
 
     <div class="grid-products">
       <% products.forEach(product => { %>
-        <article class="card">
+        <article class="card product-card">
           <a href="/produk/<%= product.slug %>">
-            <img src="<%= product.image %>" alt="<%= product.name %>" />
+            <img src="<%= (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>" alt="<%= product.name %>" />
             <h3><%= product.name %></h3>
           </a>
           <p class="price"><%= formatRupiah(product.price) %></p>
-          <p class="desc"><%= product.desc %></p>
-          <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Detail</a>
+          <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Produk</a>
         </article>
       <% }) %>
     </div>
