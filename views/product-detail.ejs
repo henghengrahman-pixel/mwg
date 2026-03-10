@@ -5,150 +5,234 @@
 <body>
   <%- include("partials/header") %>
 
+  <% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
+  <% const hasVideo = product.videos && product.videos.length; %>
+  <% const safeCategory = product.category || 'Produk Pilihan'; %>
+  <% const safeDesc = product.desc || 'Produk ini direkomendasikan karena kualitasnya baik dan banyak digunakan.'; %>
+  <% const safeShortDesc = product.shortDesc || ''; %>
+
   <section class="section container product-detail-page">
-    <div class="product-gallery">
-      <div class="main-media" onclick="openLightboxFromMain()">
-        <% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
+    <div class="product-detail-grid">
+      <div class="product-gallery-card">
+        <div class="product-gallery">
+          <div class="main-media" onclick="openLightboxFromMain()">
+            <img
+              id="mainPreview"
+              src="<%= mediaImages[0] || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
+              alt="<%= product.name %>"
+              loading="lazy"
+            />
+          </div>
 
-        <img
-          id="mainPreview"
-          src="<%= mediaImages[0] || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
-          alt="<%= product.name %>"
-          loading="lazy"
-        />
+          <% if ((product.images && product.images.length > 1) || hasVideo) { %>
+            <div class="thumb-list">
+              <% mediaImages.forEach((img, index) => { %>
+                <button
+                  type="button"
+                  class="thumb-btn <%= index === 0 ? 'active' : '' %>"
+                  onclick="changePreview('<%= img %>', 'image', <%= index %>, this)"
+                >
+                  <img src="<%= img %>" alt="<%= product.name %>" loading="lazy">
+                </button>
+              <% }) %>
+
+              <% (product.videos || []).forEach(video => { %>
+                <button
+                  type="button"
+                  class="thumb-btn video-thumb"
+                  onclick="changePreview('<%= video %>', 'video', 0, this)"
+                >
+                  <span>VIDEO</span>
+                </button>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
       </div>
 
-      <% if ((product.images && product.images.length > 1) || (product.videos && product.videos.length)) { %>
-        <div class="thumb-list">
-          <% mediaImages.forEach((img, index) => { %>
-            <button
-              type="button"
-              class="thumb-btn"
-              onclick="changePreview('<%= img %>', 'image', <%= index %>)"
-            >
-              <img src="<%= img %>" alt="<%= product.name %>" loading="lazy">
-            </button>
-          <% }) %>
+      <div class="product-info-card">
+        <div class="product-info">
+          <div class="product-top-meta">
+            <span class="pill"><%= safeCategory %></span>
+            <span class="trust-badge">Affiliate Pilihan</span>
+          </div>
 
-          <% (product.videos || []).forEach(video => { %>
-            <button
-              type="button"
-              class="thumb-btn video-thumb"
-              onclick="changePreview('<%= video %>', 'video')"
+          <h1 class="product-title"><%= product.name %></h1>
+
+          <div class="product-meta-row">
+            <span class="meta-rating">⭐ Produk Pilihan</span>
+            <span class="meta-divider">•</span>
+            <span class="meta-sales">Siap Checkout</span>
+            <span class="meta-divider">•</span>
+            <span class="meta-stock">Link Aman</span>
+          </div>
+
+          <p class="price big"><%= formatRupiah(product.price) %></p>
+
+          <% if (safeShortDesc) { %>
+            <p class="short-desc"><%= safeShortDesc %></p>
+          <% } %>
+
+          <div class="quick-info-grid">
+            <div class="quick-info-item">
+              <span class="label">Kategori</span>
+              <strong><%= safeCategory %></strong>
+            </div>
+            <div class="quick-info-item">
+              <span class="label">Cocok Untuk</span>
+              <strong>Pria / Wanita</strong>
+            </div>
+            <div class="quick-info-item">
+              <span class="label">Style</span>
+              <strong>Modern & Trendy</strong>
+            </div>
+            <div class="quick-info-item">
+              <span class="label">Pembelian</span>
+              <strong>Via Shopee</strong>
+            </div>
+          </div>
+
+          <div class="trust-points">
+            <span>✅ Link aman</span>
+            <span>✅ Produk pilihan</span>
+            <span>✅ Bisa dibantu admin</span>
+          </div>
+
+          <div class="product-description">
+            <h3>Deskripsi Produk</h3>
+            <p><%= safeDesc %></p>
+          </div>
+
+          <% if (product.benefits && product.benefits.length) { %>
+            <div class="product-benefits info-box">
+              <h3>Kelebihan Produk</h3>
+              <ul>
+                <% product.benefits.forEach(b => { %>
+                  <li><%= b %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+
+          <% if (product.specs && product.specs.length) { %>
+            <div class="product-specs info-box">
+              <h3>Spesifikasi</h3>
+              <ul>
+                <% product.specs.forEach(s => { %>
+                  <li><%= s %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+
+          <p class="cta-note">
+            Cek detail, harga terbaru, dan ketersediaan produk melalui tombol di bawah ini.
+          </p>
+
+          <div class="buy-buttons">
+            <% if (product.affiliateUrl || product.sourceUrl) { %>
+              <a
+                class="btn-buy-main"
+                target="_blank"
+                rel="nofollow sponsored"
+                href="/go/<%= product.id %>"
+              >
+                🛒 Cek Harga di Shopee
+              </a>
+            <% } %>
+
+            <a
+              class="btn-buy-admin"
+              target="_blank"
+              href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
             >
-              <span>VIDEO</span>
-            </button>
-          <% }) %>
+              💬 Minta Admin Checkoutkan
+            </a>
+          </div>
         </div>
-      <% } %>
+      </div>
     </div>
+  </section>
 
-    <div class="product-info">
-      <span class="pill"><%= product.category || 'Produk Pilihan' %></span>
-
-      <h1><%= product.name %></h1>
-
-      <p class="price big"><%= formatRupiah(product.price) %></p>
-
-      <% if (product.shortDesc) { %>
-        <p class="short-desc"><%= product.shortDesc %></p>
-      <% } %>
-
-      <div class="product-description">
-        <h3>Deskripsi Produk</h3>
-        <p><%= product.desc || 'Produk ini direkomendasikan karena kualitasnya baik dan banyak digunakan.' %></p>
+  <% if (related && related.length) { %>
+    <section class="section container related-section">
+      <div class="section-head">
+        <h2>Produk Rekomendasi Lain</h2>
+        <p class="section-subtitle">Pilihan lain yang juga menarik untuk kamu cek</p>
       </div>
 
-      <% if (product.benefits && product.benefits.length) { %>
-        <div class="product-benefits">
-          <h3>Kelebihan Produk</h3>
-          <ul>
-            <% product.benefits.forEach(b => { %>
-              <li><%= b %></li>
-            <% }) %>
-          </ul>
-        </div>
-      <% } %>
+      <div class="grid-products related-products-grid">
+        <% related.forEach(item => { %>
+          <article class="card product-card">
+            <a href="/produk/<%= item.slug %>" class="product-link">
+              <div class="product-thumb-wrap">
+                <img
+                  src="<%= (item.images && item.images.length ? item.images[0] : item.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
+                  alt="<%= item.name %>"
+                  loading="lazy"
+                />
+              </div>
 
-      <% if (product.specs && product.specs.length) { %>
-        <div class="product-specs">
-          <h3>Spesifikasi</h3>
-          <ul>
-            <% product.specs.forEach(s => { %>
-              <li><%= s %></li>
-            <% }) %>
-          </ul>
-        </div>
-      <% } %>
+              <div class="product-card-body">
+                <% if (item.category) { %>
+                  <span class="mini-category"><%= item.category %></span>
+                <% } %>
 
-      <p class="cta-note">
-        Cek detail dan ketersediaan produk melalui tombol di bawah ini.
-      </p>
+                <h3><%= item.name %></h3>
 
-      <div class="buy-buttons">
+                <div class="mini-meta">
+                  <span>⭐ Pilihan</span>
+                  <span>•</span>
+                  <span>Rekomendasi</span>
+                </div>
+
+                <% if (item.shortDesc) { %>
+                  <p class="product-short"><%= item.shortDesc %></p>
+                <% } %>
+
+                <p class="price"><%= formatRupiah(item.price) %></p>
+              </div>
+            </a>
+
+            <a class="btn primary full" href="/produk/<%= item.slug %>">
+              Lihat Produk
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <div class="mobile-sticky-buy">
+    <div class="mobile-sticky-inner">
+      <div class="mobile-price-wrap">
+        <span class="mobile-price-label">Harga</span>
+        <strong><%= formatRupiah(product.price) %></strong>
+      </div>
+
+      <div class="mobile-buy-actions">
         <% if (product.affiliateUrl || product.sourceUrl) { %>
           <a
-            class="btn-buy-main"
+            class="mobile-buy-btn primary"
             target="_blank"
             rel="nofollow sponsored"
             href="/go/<%= product.id %>"
           >
-            🛒 BELI DI SHOPEE SEKARANG
+            Shopee
           </a>
         <% } %>
 
         <a
-          class="btn-buy-admin"
+          class="mobile-buy-btn secondary"
           target="_blank"
           href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
         >
-          💬 Minta Admin Checkoutkan
+          Admin
         </a>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section class="section container">
-    <div class="section-head">
-      <h2>Produk Rekomendasi Lain</h2>
-    </div>
-
-    <div class="grid-products">
-      <% related.forEach(item => { %>
-        <article class="card product-card">
-          <a href="/produk/<%= item.slug %>" class="product-link">
-            <div class="product-thumb-wrap">
-              <img
-                src="<%= (item.images && item.images.length ? item.images[0] : item.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
-                alt="<%= item.name %>"
-                loading="lazy"
-              />
-            </div>
-
-            <div class="product-card-body">
-              <% if (item.category) { %>
-                <span class="mini-category"><%= item.category %></span>
-              <% } %>
-
-              <h3><%= item.name %></h3>
-
-              <% if (item.shortDesc) { %>
-                <p class="product-short"><%= item.shortDesc %></p>
-              <% } %>
-
-              <p class="price"><%= formatRupiah(item.price) %></p>
-            </div>
-          </a>
-
-          <a class="btn primary full" href="/produk/<%= item.slug %>">
-            Lihat Produk
-          </a>
-        </article>
-      <% }) %>
-    </div>
-  </section>
-
-  <!-- LIGHTBOX -->
   <div id="imageLightbox" class="lightbox" onclick="closeLightbox(event)">
     <button class="lightbox-close" type="button" onclick="closeLightbox(event)">×</button>
 
@@ -171,13 +255,20 @@
     let currentImageIndex = 0;
     let currentScale = 1;
 
-    function changePreview(src, type, index = 0) {
+    function clearActiveThumb() {
+      document.querySelectorAll(".thumb-btn").forEach(btn => btn.classList.remove("active"));
+    }
+
+    function changePreview(src, type, index = 0, el = null) {
       const container = document.querySelector(".main-media");
       if (!container) return;
 
+      clearActiveThumb();
+      if (el) el.classList.add("active");
+
       if (type === "video") {
         container.innerHTML = `
-          <video controls playsinline style="width:100%;border-radius:16px;">
+          <video controls playsinline class="main-preview-video">
             <source src="${src}">
             Browser tidak mendukung video
           </video>
@@ -199,7 +290,9 @@
       const mainPreview = document.getElementById("mainPreview");
       if (!mainPreview) return;
 
-      const foundIndex = galleryImages.findIndex(img => img === mainPreview.src);
+      const currentSrc = mainPreview.getAttribute("src");
+      const foundIndex = galleryImages.findIndex(img => img === currentSrc);
+
       if (foundIndex >= 0) {
         currentImageIndex = foundIndex;
       }
@@ -222,6 +315,7 @@
 
     function closeLightbox(event) {
       if (event) event.stopPropagation();
+
       const lightbox = document.getElementById("imageLightbox");
       if (!lightbox) return;
 
@@ -304,7 +398,7 @@
           "<%= img %>"<%= i < mediaImages.length - 1 ? "," : "" %>
         <% }) %>
       ],
-      "description":"<%= product.desc || product.shortDesc || product.name %>",
+      "description":"<%= safeDesc || safeShortDesc || product.name %>",
       "brand":{
         "@type":"Brand",
         "name":"Teman Belanja"
