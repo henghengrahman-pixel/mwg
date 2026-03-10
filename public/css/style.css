@@ -47,7 +47,7 @@ TOPBAR
   color:#fff;
   position:sticky;
   top:0;
-  z-index:50;
+  z-index:60;
   box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 
@@ -121,13 +121,17 @@ HERO
 
 .badge,
 .pill{
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   background:#fff2e8;
   color:#ff5a00;
   padding:8px 12px;
   border-radius:999px;
   font-size:13px;
   font-weight:700;
+  width:fit-content;
+  max-width:100%;
 }
 
 .page-head{
@@ -196,6 +200,7 @@ CARDS
   width:100%;
   min-width:0;
   overflow:hidden;
+  border:1px solid rgba(0,0,0,0.03);
 }
 
 .card:hover{
@@ -221,6 +226,7 @@ PRODUCT CARD
   gap:10px;
   width:100%;
   min-width:0;
+  height:100%;
 }
 
 .product-link{
@@ -242,6 +248,11 @@ PRODUCT CARD
   height:100%;
   object-fit:cover;
   border-radius:14px;
+  transition:transform .35s ease;
+}
+
+.product-card:hover .product-thumb-wrap img{
+  transform:scale(1.04);
 }
 
 .product-card-body{
@@ -285,7 +296,8 @@ PRICE
 
 .price.big{
   font-size:32px;
-  margin:10px 0;
+  margin:10px 0 12px;
+  line-height:1.15;
 }
 
 /* =========================
@@ -334,7 +346,7 @@ BUTTONS
   margin-top:10px;
 }
 
-/* FIX UTAMA TOMBOL PRODUK */
+/* FIX TOMBOL CARD */
 .product-card .btn,
 .product-card .btn.full,
 .card .btn.full,
@@ -366,7 +378,7 @@ BUY CTA BUTTONS
   border-radius:14px;
   font-weight:800;
   font-size:16px;
-  box-shadow:0 10px 30px rgba(255,90,0,0.45);
+  box-shadow:0 10px 30px rgba(255,90,0,0.28);
   transition:all .25s ease;
   display:inline-flex;
   align-items:center;
@@ -374,11 +386,12 @@ BUY CTA BUTTONS
   text-align:center;
   max-width:100%;
   box-sizing:border-box;
+  min-height:56px;
 }
 
 .btn-buy-main:hover{
-  transform:translateY(-3px) scale(1.02);
-  box-shadow:0 15px 35px rgba(255,90,0,0.65);
+  transform:translateY(-3px) scale(1.01);
+  box-shadow:0 15px 35px rgba(255,90,0,0.38);
 }
 
 .btn-buy-admin{
@@ -395,6 +408,7 @@ BUY CTA BUTTONS
   text-align:center;
   max-width:100%;
   box-sizing:border-box;
+  min-height:56px;
 }
 
 .btn-buy-admin:hover{
@@ -406,7 +420,7 @@ BUY CTA BUTTONS
 .cta-note{
   font-size:14px;
   color:#666;
-  margin-top:16px;
+  margin-top:18px;
   margin-bottom:8px;
 }
 
@@ -446,8 +460,8 @@ PRODUCT DETAIL
 
 .product-detail-page{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:40px;
+  grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);
+  gap:34px;
   align-items:start;
 }
 
@@ -460,16 +474,25 @@ PRODUCT DETAIL
 
 .main-media{
   background:#fff;
-  border-radius:18px;
-  padding:10px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.05);
+  border-radius:22px;
+  padding:12px;
+  box-shadow:0 10px 32px rgba(0,0,0,0.06);
   overflow:hidden;
+  cursor:zoom-in;
+  min-height:420px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(0,0,0,0.04);
 }
 
 .main-media img,
 .main-media video{
-  border-radius:18px;
   width:100%;
+  height:auto;
+  max-height:620px;
+  object-fit:contain;
+  border-radius:18px;
 }
 
 .thumb-list{
@@ -482,44 +505,55 @@ PRODUCT DETAIL
   border:none;
   padding:0;
   cursor:pointer;
-  width:72px;
-  height:72px;
-  border-radius:12px;
+  width:74px;
+  height:74px;
+  border-radius:14px;
   overflow:hidden;
   background:#fff;
   box-shadow:0 4px 12px rgba(0,0,0,0.06);
   flex:0 0 auto;
+  border:2px solid transparent;
+  transition:all .2s ease;
+}
+
+.thumb-btn:hover{
+  transform:translateY(-2px);
+  border-color:#ffd2b8;
 }
 
 .thumb-btn img{
   width:100%;
   height:100%;
   object-fit:cover;
+  border-radius:0;
 }
 
 .video-thumb{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#111;
+  background:linear-gradient(135deg,#222,#111);
   color:#fff;
   font-size:12px;
   font-weight:700;
+  letter-spacing:.5px;
 }
 
 .product-info{
   background:#fff;
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.05);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 10px 32px rgba(0,0,0,0.06);
   min-width:0;
+  border:1px solid rgba(0,0,0,0.04);
 }
 
 .product-info h1{
-  margin:10px 0;
+  margin:12px 0 10px;
   font-size:32px;
   line-height:1.25;
   word-break:break-word;
+  letter-spacing:-0.3px;
 }
 
 .short-desc{
@@ -531,7 +565,9 @@ PRODUCT DETAIL
 .product-description,
 .product-benefits,
 .product-specs{
-  margin-top:18px;
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid #f0f0f0;
 }
 
 .product-description h3,
@@ -539,12 +575,15 @@ PRODUCT DETAIL
 .product-specs h3{
   margin:0 0 10px;
   font-size:20px;
+  line-height:1.3;
 }
 
 .product-description p{
   margin:0;
   color:#444;
-  line-height:1.75;
+  line-height:1.8;
+  white-space:pre-line;
+  word-break:break-word;
 }
 
 .product-benefits ul,
@@ -555,8 +594,26 @@ PRODUCT DETAIL
 
 .product-benefits li,
 .product-specs li{
-  margin-bottom:6px;
+  margin-bottom:8px;
   color:#444;
+  line-height:1.7;
+  word-break:break-word;
+}
+
+/* =========================
+RELATED PRODUCTS SECTION
+========================= */
+
+.product-related-section{
+  padding-top:8px;
+}
+
+.product-related-section .section-head{
+  margin-bottom:18px;
+}
+
+.product-related-section .grid-products{
+  align-items:stretch;
 }
 
 /* =========================
@@ -599,6 +656,131 @@ ARTICLE
   color:#333;
   line-height:1.9;
   word-break:break-word;
+}
+
+/* =========================
+LIGHTBOX
+========================= */
+
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:24px;
+}
+
+.lightbox.show{
+  display:flex;
+}
+
+.lightbox-content{
+  position:relative;
+  max-width:min(92vw,1100px);
+  max-height:84vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.lightbox-content img{
+  max-width:100%;
+  max-height:84vh;
+  object-fit:contain;
+  border-radius:18px;
+  transition:transform .2s ease;
+  transform-origin:center center;
+  box-shadow:0 12px 40px rgba(0,0,0,0.4);
+}
+
+.lightbox-close{
+  position:absolute;
+  top:18px;
+  right:22px;
+  width:48px;
+  height:48px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  font-size:32px;
+  line-height:1;
+  cursor:pointer;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(4px);
+}
+
+.lightbox-close:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+.lightbox-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:52px;
+  height:52px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  font-size:28px;
+  cursor:pointer;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(4px);
+}
+
+.lightbox-nav:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+.lightbox-prev{
+  left:20px;
+}
+
+.lightbox-next{
+  right:20px;
+}
+
+.lightbox-toolbar{
+  position:absolute;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  z-index:3;
+  background:rgba(255,255,255,0.1);
+  padding:10px 12px;
+  border-radius:999px;
+  backdrop-filter:blur(6px);
+}
+
+.lightbox-tool-btn{
+  min-width:46px;
+  height:42px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,0.14);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  padding:0 12px;
+}
+
+.lightbox-tool-btn:hover{
+  background:rgba(255,255,255,0.22);
 }
 
 /* =========================
@@ -691,7 +873,7 @@ SITE INFO
 RESPONSIVE
 ========================= */
 
-@media(max-width:1000px){
+@media(max-width:1100px){
   .grid-products{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
@@ -702,6 +884,10 @@ RESPONSIVE
 
   .product-detail-page{
     grid-template-columns:1fr;
+  }
+
+  .main-media{
+    min-height:360px;
   }
 }
 
@@ -744,6 +930,62 @@ RESPONSIVE
   .searchbar{
     flex-direction:column;
   }
+
+  .product-info{
+    padding:22px 18px;
+  }
+
+  .main-media{
+    padding:8px;
+    min-height:280px;
+  }
+
+  .product-info h1{
+    font-size:27px;
+  }
+
+  .price.big{
+    font-size:28px;
+  }
+
+  .thumb-btn{
+    width:64px;
+    height:64px;
+  }
+
+  .lightbox{
+    padding:18px;
+  }
+
+  .lightbox-nav{
+    width:46px;
+    height:46px;
+    font-size:24px;
+  }
+
+  .lightbox-prev{
+    left:10px;
+  }
+
+  .lightbox-next{
+    right:10px;
+  }
+
+  .lightbox-close{
+    top:10px;
+    right:12px;
+  }
+
+  .lightbox-toolbar{
+    bottom:14px;
+    gap:8px;
+    padding:8px 10px;
+  }
+
+  .lightbox-tool-btn{
+    min-width:42px;
+    height:38px;
+  }
 }
 
 @media(max-width:480px){
@@ -760,11 +1002,14 @@ RESPONSIVE
   }
 
   .product-info{
-    padding:18px;
+    padding:18px 16px;
+    border-radius:18px;
   }
 
   .main-media{
     padding:6px;
+    border-radius:18px;
+    min-height:240px;
   }
 
   .card{
@@ -776,5 +1021,54 @@ RESPONSIVE
   .card .btn.full{
     padding:13px 14px;
     font-size:14px;
+  }
+
+  .logo{
+    font-size:24px;
+  }
+
+  .hero-wrap h1{
+    font-size:30px;
+  }
+
+  .section{
+    padding:36px 0;
+  }
+
+  .section-head h2{
+    font-size:24px;
+  }
+
+  .product-info h1{
+    font-size:24px;
+  }
+
+  .price.big{
+    font-size:25px;
+  }
+
+  .btn-buy-main,
+  .btn-buy-admin{
+    padding:14px 16px;
+    font-size:15px;
+    min-height:52px;
+  }
+
+  .thumb-list{
+    gap:8px;
+  }
+
+  .thumb-btn{
+    width:58px;
+    height:58px;
+    border-radius:12px;
+  }
+
+  .lightbox-content{
+    max-width:95vw;
+  }
+
+  .lightbox-content img{
+    max-height:76vh;
   }
 }
