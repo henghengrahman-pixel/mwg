@@ -1,185 +1,173 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <%- include("partials/head") %>
 
 <body>
+  <%- include("partials/header") %>
 
-<%- include("partials/header") %>
+  <section class="hero">
+    <div class="container hero-wrap">
+      <div class="hero-content">
+        <span class="badge">Rekomendasi Produk & Tips Belanja</span>
 
-<section class="hero">
-  <div class="container hero-wrap">
+        <h1>Teman Belanja</h1>
 
-    <div class="hero-content">
+        <p class="hero-desc">
+          Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
+          review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
+          harian, rumah tangga, fashion, dan lainnya.
+        </p>
 
-      <span class="badge">Rekomendasi Produk & Tips Belanja</span>
+        <div class="hero-actions">
+          <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
+          <a class="btn ghost" href="/artikel">Baca Artikel</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <h1>Teman Belanja</h1>
-
-      <p class="hero-desc">
-        Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
-        review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
-        harian, rumah tangga, fashion, dan lainnya.
-      </p>
-
-      <div class="hero-actions">
-        <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
-        <a class="btn ghost" href="/artikel">Baca Artikel</a>
+  <% if (products && products.length) { %>
+    <section class="section container">
+      <div class="section-head">
+        <div>
+          <h2>Produk Rekomendasi</h2>
+          <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
+        </div>
+        <a href="/produk">Lihat semua</a>
       </div>
 
+      <div class="grid-products">
+        <% products.slice(0,8).forEach(product => { %>
+          <% const coverImage = (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
+
+          <article class="card product-card">
+            <a href="/produk/<%= product.slug %>" class="product-link">
+              <div class="product-thumb-wrap">
+                <img
+                  src="<%= coverImage %>"
+                  alt="<%= product.name %>"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="product-card-body">
+                <% if(product.category){ %>
+                  <span class="mini-category"><%= product.category %></span>
+                <% } %>
+
+                <h3><%= product.name %></h3>
+
+                <div class="mini-meta">
+                  <span>⭐ Pilihan</span>
+                  <span>•</span>
+                  <span>Affiliate</span>
+                </div>
+
+                <% if(product.shortDesc){ %>
+                  <p class="product-short"><%= product.shortDesc %></p>
+                <% } %>
+
+                <p class="price"><%= formatRupiah(product.price) %></p>
+              </div>
+            </a>
+
+            <a
+              class="btn primary full"
+              href="/produk/<%= product.slug %>"
+            >
+              Lihat Produk
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="section container">
+    <div class="home-highlight-grid">
+      <div class="home-highlight-card">
+        <span class="pill">Belanja Lebih Mudah</span>
+        <h3>Produk Pilihan yang Sudah Dirangkum</h3>
+        <p>
+          Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu
+          menemukan produk menarik yang layak dicek lebih cepat.
+        </p>
+      </div>
+
+      <div class="home-highlight-card">
+        <span class="pill">Link Affiliate</span>
+        <h3>Langsung Cek Harga & Detail</h3>
+        <p>
+          Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa
+          langsung melihat harga terbaru, varian, dan stok produk.
+        </p>
+      </div>
+
+      <div class="home-highlight-card">
+        <span class="pill">Tips Belanja</span>
+        <h3>Artikel Ringkas dan Mudah Dipahami</h3>
+        <p>
+          Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih
+          mudah menentukan pilihan yang cocok dengan kebutuhanmu.
+        </p>
+      </div>
     </div>
-
-  </div>
-</section>
-
-
-
-<section class="section container">
-
-<div class="section-head">
-
-<h2>Produk Rekomendasi</h2>
-
-<a href="/produk">Lihat semua</a>
-
-</div>
-
-
-<div class="grid-products">
-
-<% products.slice(0,8).forEach(product => { %>
-
-<% const coverImage =
-(product.images && product.images.length ? product.images[0] : product.image)
-|| 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
-
-
-<article class="card product-card">
-
-<a href="/produk/<%= product.slug %>" class="product-link">
-
-<div class="product-thumb-wrap">
-
-<img
-src="<%= coverImage %>"
-alt="<%= product.name %>"
-loading="lazy"
-/>
-
-</div>
-
-
-<div class="product-card-body">
-
-<% if(product.category){ %>
-<span class="mini-category"><%= product.category %></span>
-<% } %>
-
-
-<h3><%= product.name %></h3>
-
-
-<% if(product.shortDesc){ %>
-<p class="product-short"><%= product.shortDesc %></p>
-<% } %>
-
-
-<p class="price"><%= formatRupiah(product.price) %></p>
-
-</div>
-
-</a>
-
-
-<a
-class="btn primary full"
-href="/produk/<%= product.slug %>">
-
-Lihat Produk
-
-</a>
-
-</article>
-
-<% }) %>
-
-</div>
-
-</section>
-
-
-
-<section class="section container">
-
-<div class="section-head">
-
-<h2>Artikel Terbaru</h2>
-
-<a href="/artikel">Lihat semua</a>
-
-</div>
-
-
-<div class="grid-articles">
-
-<% articles.forEach(article => { %>
-
-<article class="card article-card">
-
-<a href="/artikel/<%= article.slug %>">
-
-<img
-src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
-alt="<%= article.title %>"
-loading="lazy"
-/>
-
-<h3><%= article.title %></h3>
-
-</a>
-
-
-<% if(article.excerpt){ %>
-
-<p><%= article.excerpt %></p>
-
-<% } %>
-
-</article>
-
-<% }) %>
-
-</div>
-
-</section>
-
-
-
-<section class="section container">
-
-<div class="site-info">
-
-<h2>Tentang Teman Belanja</h2>
-
-<p>
-Teman Belanja membantu kamu menemukan berbagai barang menarik
-yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
-pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
-</p>
-
-<p>
-Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
-pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
-dengan lebih mudah.
-</p>
-
-</div>
-
-</section>
-
-
-
-<%- include("partials/footer") %>
-
+  </section>
+
+  <% if (articles && articles.length) { %>
+    <section class="section container">
+      <div class="section-head">
+        <div>
+          <h2>Artikel Terbaru</h2>
+          <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
+        </div>
+        <a href="/artikel">Lihat semua</a>
+      </div>
+
+      <div class="grid-articles">
+        <% articles.slice(0,6).forEach(article => { %>
+          <article class="card article-card">
+            <a href="/artikel/<%= article.slug %>">
+              <img
+                src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
+                alt="<%= article.title %>"
+                loading="lazy"
+              />
+
+              <h3><%= article.title %></h3>
+            </a>
+
+            <% if(article.excerpt){ %>
+              <p><%= article.excerpt %></p>
+            <% } %>
+
+            <a class="btn ghost full" href="/artikel/<%= article.slug %>">
+              Baca Artikel
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="section container">
+    <div class="site-info">
+      <h2>Tentang Teman Belanja</h2>
+
+      <p>
+        Teman Belanja membantu kamu menemukan berbagai barang menarik
+        yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
+        pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
+      </p>
+
+      <p>
+        Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
+        pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
+        dengan lebih mudah.
+      </p>
+    </div>
+  </section>
+
+  <%- include("partials/footer") %>
 </body>
 </html>
