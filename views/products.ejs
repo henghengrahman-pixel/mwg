@@ -5,36 +5,42 @@
 <body>
   <%- include("partials/header") %>
 
-  <section class="section container">
-    <div class="page-head">
-      <span class="pill">Rekomendasi Pilihan</span>
-      <h1>Rekomendasi Barang Bagus</h1>
-      <p class="page-lead">
-        Temukan berbagai rekomendasi barang bagus untuk kebutuhan harian, rumah tangga,
-        fashion, dan kategori lainnya. Kami merangkum produk pilihan yang layak dilihat
-        berdasarkan fungsi, tampilan, dan nilai pakainya.
-      </p>
+  <section class="section container products-page">
+    <div class="page-head products-page-head">
+      <div class="page-head-content">
+        <span class="pill">Rekomendasi Pilihan</span>
+        <h1>Rekomendasi Barang Bagus</h1>
+        <p class="page-lead">
+          Temukan berbagai rekomendasi barang bagus untuk kebutuhan harian, rumah tangga,
+          fashion, dan kategori lainnya. Kami merangkum produk pilihan yang layak dilihat
+          berdasarkan fungsi, tampilan, dan nilai pakainya.
+        </p>
+      </div>
     </div>
 
-    <form class="searchbar" method="get" action="/produk">
-      <input
-        type="text"
-        name="q"
-        placeholder="Cari produk bagus..."
-        value="<%= q || '' %>"
-        aria-label="Cari produk"
-      />
-      <button type="submit" class="btn primary">Cari</button>
-    </form>
+    <div class="products-toolbar">
+      <form class="searchbar products-searchbar" method="get" action="/produk">
+        <input
+          type="text"
+          name="q"
+          placeholder="Cari produk bagus..."
+          value="<%= q || '' %>"
+          aria-label="Cari produk"
+        />
+        <button type="submit" class="btn primary">Cari</button>
+      </form>
 
-    <% if (q) { %>
-      <div class="search-info">
-        <p>Hasil pencarian untuk: <strong><%= q %></strong></p>
+      <div class="products-summary">
+        <% if (q) { %>
+          <p>Hasil pencarian untuk: <strong><%= q %></strong></p>
+        <% } else { %>
+          <p>Total rekomendasi: <strong><%= products ? products.length : 0 %></strong> produk</p>
+        <% } %>
       </div>
-    <% } %>
+    </div>
 
     <% if (products && products.length) { %>
-      <div class="grid-products">
+      <div class="grid-products products-grid-list">
         <% products.forEach(product => { %>
           <% const coverImage = (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
 
@@ -55,6 +61,12 @@
 
                 <h3><%= product.name %></h3>
 
+                <div class="mini-meta">
+                  <span>⭐ Pilihan</span>
+                  <span>•</span>
+                  <span>Affiliate</span>
+                </div>
+
                 <% if (product.shortDesc) { %>
                   <p class="product-short"><%= product.shortDesc %></p>
                 <% } %>
@@ -70,12 +82,18 @@
         <% }) %>
       </div>
     <% } else { %>
-      <div class="empty-state card">
-        <h2>Belum ada produk</h2>
+      <div class="empty-state card empty-products-state">
+        <span class="pill">Belum ditemukan</span>
+        <h2>Produk belum tersedia</h2>
         <p>
           Produk belum tersedia atau kata kunci yang kamu cari belum ditemukan.
-          Coba gunakan kata kunci lain yang lebih singkat.
+          Coba gunakan kata kunci lain yang lebih singkat dan lebih umum.
         </p>
+
+        <div class="empty-actions">
+          <a href="/produk" class="btn primary">Lihat Semua Produk</a>
+          <a href="/" class="btn ghost">Kembali ke Beranda</a>
+        </div>
       </div>
     <% } %>
   </section>
