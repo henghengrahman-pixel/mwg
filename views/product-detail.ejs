@@ -7,7 +7,7 @@
 
   <section class="section container product-detail-page">
     <div class="product-gallery">
-      <div class="main-media">
+      <div class="main-media" onclick="openLightboxFromMain()">
         <% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
 
         <img
@@ -20,11 +20,11 @@
 
       <% if ((product.images && product.images.length > 1) || (product.videos && product.videos.length)) { %>
         <div class="thumb-list">
-          <% mediaImages.forEach(img => { %>
+          <% mediaImages.forEach((img, index) => { %>
             <button
               type="button"
               class="thumb-btn"
-              onclick="changePreview('<%= img %>', 'image')"
+              onclick="changePreview('<%= img %>', 'image', <%= index %>)"
             >
               <img src="<%= img %>" alt="<%= product.name %>" loading="lazy">
             </button>
@@ -148,8 +148,30 @@
     </div>
   </section>
 
+  <!-- LIGHTBOX -->
+  <div id="imageLightbox" class="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" type="button" onclick="closeLightbox(event)">×</button>
+
+    <button class="lightbox-nav lightbox-prev" type="button" onclick="prevImage(event)">❮</button>
+    <button class="lightbox-nav lightbox-next" type="button" onclick="nextImage(event)">❯</button>
+
+    <div class="lightbox-toolbar" onclick="event.stopPropagation()">
+      <button type="button" class="lightbox-tool-btn" onclick="zoomOut(event)">－</button>
+      <button type="button" class="lightbox-tool-btn" onclick="resetZoom(event)">100%</button>
+      <button type="button" class="lightbox-tool-btn" onclick="zoomIn(event)">＋</button>
+    </div>
+
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <img id="lightboxImage" src="" alt="Preview Besar">
+    </div>
+  </div>
+
   <script>
-    function changePreview(src, type) {
+    const galleryImages = <%- JSON.stringify(mediaImages || []) %>;
+    let currentImageIndex = 0;
+    let currentScale = 1;
+
+    function changePreview(src, type, index = 0) {
       const container = document.querySelector(".main-media");
       if (!container) return;
 
@@ -161,11 +183,115 @@
           </video>
         `;
       } else {
+        currentImageIndex = index;
         container.innerHTML = `
-          <img id="mainPreview" src="${src}" alt="Preview Produk" />
+          <img
+            id="mainPreview"
+            src="${src}"
+            alt="Preview Produk"
+            onclick="openLightboxFromMain()"
+          />
         `;
       }
     }
+
+    function openLightboxFromMain() {
+      const mainPreview = document.getElementById("mainPreview");
+      if (!mainPreview) return;
+
+      const foundIndex = galleryImages.findIndex(img => img === mainPreview.src);
+      if (foundIndex >= 0) {
+        currentImageIndex = foundIndex;
+      }
+
+      openLightbox();
+    }
+
+    function openLightbox() {
+      const lightbox = document.getElementById("imageLightbox");
+      const lightboxImage = document.getElementById("lightboxImage");
+      if (!lightbox || !lightboxImage || !galleryImages.length) return;
+
+      lightboxImage.src = galleryImages[currentImageIndex] || galleryImages[0];
+      currentScale = 1;
+      updateZoom();
+
+      lightbox.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox(event) {
+      if (event) event.stopPropagation();
+      const lightbox = document.getElementById("imageLightbox");
+      if (!lightbox) return;
+
+      lightbox.classList.remove("show");
+      document.body.style.overflow = "";
+      currentScale = 1;
+    }
+
+    function updateLightboxImage() {
+      const lightboxImage = document.getElementById("lightboxImage");
+      if (!lightboxImage || !galleryImages.length) return;
+
+      lightboxImage.src = galleryImages[currentImageIndex];
+      currentScale = 1;
+      updateZoom();
+    }
+
+    function prevImage(event) {
+      if (event) event.stopPropagation();
+      if (!galleryImages.length) return;
+
+      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+      updateLightboxImage();
+    }
+
+    function nextImage(event) {
+      if (event) event.stopPropagation();
+      if (!galleryImages.length) return;
+
+      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+      updateLightboxImage();
+    }
+
+    function zoomIn(event) {
+      if (event) event.stopPropagation();
+      currentScale = Math.min(currentScale + 0.2, 3);
+      updateZoom();
+    }
+
+    function zoomOut(event) {
+      if (event) event.stopPropagation();
+      currentScale = Math.max(currentScale - 0.2, 0.6);
+      updateZoom();
+    }
+
+    function resetZoom(event) {
+      if (event) event.stopPropagation();
+      currentScale = 1;
+      updateZoom();
+    }
+
+    function updateZoom() {
+      const lightboxImage = document.getElementById("lightboxImage");
+      if (!lightboxImage) return;
+      lightboxImage.style.transform = `scale(${currentScale})`;
+    }
+
+    document.addEventListener("keydown", function(e) {
+      const lightbox = document.getElementById("imageLightbox");
+      const isOpen = lightbox && lightbox.classList.contains("show");
+
+      if (!isOpen) return;
+
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "+" || e.key === "=") zoomIn();
+      if (e.key === "-") zoomOut();
+      if (e.key === "0") resetZoom();
+    });
   </script>
 
   <script type="application/ld+json">
