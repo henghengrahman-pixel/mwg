@@ -1,18 +1,3 @@
-Ini versi **fix lengkap** `style.css` yang sudah aku update supaya cocok dengan:
-
-* `home.ejs`
-* `products.ejs`
-* `product-detail.ejs`
-* tombol **2 CTA**
-* gallery produk
-* card produk modern
-* admin box
-* mobile lebih rapi
-* tampilan lebih premium dan lebih menarik perhatian
-
-Ganti seluruh isi `public/css/style.css` kamu dengan ini:
-
-```css
 *{
   box-sizing:border-box;
 }
@@ -34,8 +19,9 @@ a{
   color:inherit;
 }
 
-img{
-  width:100%;
+img,
+video{
+  max-width:100%;
   display:block;
   border-radius:14px;
 }
@@ -70,6 +56,7 @@ TOPBAR
   justify-content:space-between;
   align-items:center;
   padding:16px 0;
+  gap:16px;
 }
 
 .logo{
@@ -82,6 +69,7 @@ TOPBAR
   display:flex;
   gap:18px;
   align-items:center;
+  flex-wrap:wrap;
 }
 
 .nav a{
@@ -185,13 +173,13 @@ GRID
 
 .grid-products{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:20px;
 }
 
 .grid-articles{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:20px;
 }
 
@@ -205,6 +193,9 @@ CARDS
   padding:14px;
   box-shadow:0 8px 30px rgba(0,0,0,0.06);
   transition:.25s;
+  width:100%;
+  min-width:0;
+  overflow:hidden;
 }
 
 .card:hover{
@@ -216,6 +207,7 @@ CARDS
   margin:10px 0 6px;
   font-size:18px;
   line-height:1.4;
+  word-break:break-word;
 }
 
 /* =========================
@@ -227,13 +219,17 @@ PRODUCT CARD
   flex-direction:column;
   justify-content:space-between;
   gap:10px;
+  width:100%;
+  min-width:0;
 }
 
 .product-link{
   display:block;
+  width:100%;
 }
 
 .product-thumb-wrap{
+  width:100%;
   aspect-ratio:1/1;
   overflow:hidden;
   border-radius:14px;
@@ -245,12 +241,15 @@ PRODUCT CARD
   width:100%;
   height:100%;
   object-fit:cover;
+  border-radius:14px;
 }
 
 .product-card-body{
   display:flex;
   flex-direction:column;
   gap:6px;
+  width:100%;
+  min-width:0;
 }
 
 .product-short{
@@ -258,6 +257,7 @@ PRODUCT CARD
   color:#666;
   margin:0;
   line-height:1.5;
+  word-break:break-word;
 }
 
 .mini-category{
@@ -269,6 +269,7 @@ PRODUCT CARD
   padding:6px 10px;
   border-radius:999px;
   width:fit-content;
+  max-width:100%;
 }
 
 /* =========================
@@ -292,7 +293,9 @@ BUTTONS
 ========================= */
 
 .btn{
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   padding:12px 18px;
   border-radius:12px;
   font-weight:700;
@@ -300,6 +303,9 @@ BUTTONS
   cursor:pointer;
   transition:.2s;
   border:none;
+  text-align:center;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
 .btn.primary{
@@ -322,9 +328,23 @@ BUTTONS
 }
 
 .btn.full{
+  display:flex;
   width:100%;
   text-align:center;
   margin-top:10px;
+}
+
+/* FIX UTAMA TOMBOL PRODUK */
+.product-card .btn,
+.product-card .btn.full,
+.card .btn.full,
+.card a.btn.full,
+.product-card a.btn.full{
+  width:100%;
+  max-width:100%;
+  margin-top:12px;
+  padding:14px 16px;
+  border-radius:14px;
 }
 
 /* =========================
@@ -336,6 +356,7 @@ BUY CTA BUTTONS
   gap:12px;
   flex-wrap:wrap;
   margin-top:20px;
+  width:100%;
 }
 
 .btn-buy-main{
@@ -351,6 +372,8 @@ BUY CTA BUTTONS
   align-items:center;
   justify-content:center;
   text-align:center;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
 .btn-buy-main:hover{
@@ -370,6 +393,8 @@ BUY CTA BUTTONS
   align-items:center;
   justify-content:center;
   text-align:center;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
 .btn-buy-admin:hover{
@@ -404,6 +429,7 @@ select{
   border:1px solid #ddd;
   font-size:14px;
   background:#fff;
+  box-sizing:border-box;
 }
 
 .searchbar input:focus,
@@ -420,7 +446,7 @@ PRODUCT DETAIL
 
 .product-detail-page{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:40px;
   align-items:start;
 }
@@ -429,6 +455,7 @@ PRODUCT DETAIL
   display:flex;
   flex-direction:column;
   gap:14px;
+  min-width:0;
 }
 
 .main-media{
@@ -436,6 +463,7 @@ PRODUCT DETAIL
   border-radius:18px;
   padding:10px;
   box-shadow:0 8px 30px rgba(0,0,0,0.05);
+  overflow:hidden;
 }
 
 .main-media img,
@@ -460,6 +488,7 @@ PRODUCT DETAIL
   overflow:hidden;
   background:#fff;
   box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  flex:0 0 auto;
 }
 
 .thumb-btn img{
@@ -483,12 +512,14 @@ PRODUCT DETAIL
   border-radius:18px;
   padding:24px;
   box-shadow:0 8px 30px rgba(0,0,0,0.05);
+  min-width:0;
 }
 
 .product-info h1{
   margin:10px 0;
   font-size:32px;
   line-height:1.25;
+  word-break:break-word;
 }
 
 .short-desc{
@@ -567,6 +598,7 @@ ARTICLE
 .article-detail .content{
   color:#333;
   line-height:1.9;
+  word-break:break-word;
 }
 
 /* =========================
@@ -661,11 +693,11 @@ RESPONSIVE
 
 @media(max-width:1000px){
   .grid-products{
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
   .grid-articles{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
   .product-detail-page{
@@ -675,7 +707,7 @@ RESPONSIVE
 
 @media(max-width:700px){
   .grid-products{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
   .grid-articles{
@@ -734,5 +766,15 @@ RESPONSIVE
   .main-media{
     padding:6px;
   }
+
+  .card{
+    padding:12px;
+  }
+
+  .product-card .btn,
+  .product-card .btn.full,
+  .card .btn.full{
+    padding:13px 14px;
+    font-size:14px;
+  }
 }
-```
