@@ -235,6 +235,40 @@ function escapeXml(text = "") {
     .replaceAll("'", "&apos;");
 }
 
+function sortProductsForDisplay(items = []) {
+  return [...items].sort((a, b) => {
+    if (Number(b.isFeatured) !== Number(a.isFeatured)) {
+      return Number(b.isFeatured) - Number(a.isFeatured);
+    }
+
+    const aUpdated = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const bUpdated = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    return bUpdated - aUpdated;
+  });
+}
+
+function getRelatedProducts(products, currentProduct, limit = 4) {
+  const currentCategory = safeText(currentProduct.category).toLowerCase();
+
+  const activeOthers = products.filter(
+    (p) => p.active !== false && p.slug !== currentProduct.slug
+  );
+
+  const sameCategory = activeOthers.filter((p) => {
+    const category = safeText(p.category).toLowerCase();
+    return currentCategory && category === currentCategory;
+  });
+
+  const fallbackOthers = activeOthers.filter((p) => {
+    return !sameCategory.some((item) => item.id === p.id);
+  });
+
+  return uniqueArray([
+    ...sortProductsForDisplay(sameCategory),
+    ...sortProductsForDisplay(fallbackOthers)
+  ]).slice(0, limit);
+}
+
 function getProducts() {
   const products = readJson(PRODUCTS_FILE, []);
   return products.map((item) => {
@@ -482,15 +516,9 @@ app.get("/health", (req, res) => {
 // FRONTEND ROUTES
 // =========================
 app.get("/", (req, res) => {
-  const products = getProducts()
-    .filter((p) => p.active !== false)
-    .sort((a, b) => {
-      if (Number(b.isFeatured) !== Number(a.isFeatured)) {
-        return Number(b.isFeatured) - Number(a.isFeatured);
-      }
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    })
-    .slice(0, 12);
+  const products = sortProductsForDisplay(
+    getProducts().filter((p) => p.active !== false)
+  ).slice(0, 12);
 
   const articles = getArticles()
     .filter((a) => a.active !== false)
@@ -525,12 +553,7 @@ app.get("/produk", (req, res) => {
     );
   }
 
-  products.sort((a, b) => {
-    if (Number(b.isFeatured) !== Number(a.isFeatured)) {
-      return Number(b.isFeatured) - Number(a.isFeatured);
-    }
-    return new Date(b.createdAt) - new Date(a.createdAt);
-  });
+  products = sortProductsForDisplay(products);
 
   const structuredData = [
     breadcrumbStructuredData([
@@ -562,15 +585,7 @@ app.get("/produk/:slug", (req, res) => {
     });
   }
 
-  const related = products
-    .filter(
-      (p) =>
-        p.slug !== product.slug &&
-        p.active !== false &&
-        (p.category === product.category || !product.category)
-    )
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 4);
+  const related = getRelatedProducts(products, product, 4);
 
   const structuredData = [
     breadcrumbStructuredData([
@@ -1129,4 +1144,3 @@ app.listen(PORT, () => {
   console.log(`Data dir: ${DATA_DIR}`);
   console.log(`Upload dir: ${UPLOAD_DIR}`);
 });
-      
