@@ -1,3 +1,5 @@
+ini app.js ku 
+
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -14,9 +16,8 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_ID = process.env.ADMIN_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
-const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.store").replace(/\/+$/, "");
+const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.com").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET || "teman-belanja-secret";
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 const VIEWS_DIR = path.join(__dirname, "views");
@@ -71,8 +72,8 @@ app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "20mb" }));
 
-app.use(express.static(PUBLIC_DIR, { maxAge: "7d" }));
-app.use("/uploads", express.static(UPLOAD_DIR, { maxAge: "7d" }));
+app.use(express.static(PUBLIC_DIR));
+app.use("/uploads", express.static(UPLOAD_DIR));
 
 app.use(
   session({
@@ -82,53 +83,10 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: IS_PRODUCTION
+      secure: false
     }
   })
 );
-
-// =========================
-// BASIC HEADERS + SEO MIDDLEWARE
-// =========================
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  next();
-});
-
-// Redirect ke BASE_URL kalau host beda, kecuali localhost/dev
-app.use((req, res, next) => {
-  const host = req.get("host");
-  const proto = req.headers["x-forwarded-proto"] || req.protocol;
-  const currentUrl = `${proto}://${host}`;
-
-  const isLocal =
-    !host ||
-    host.includes("localhost") ||
-    host.startsWith("127.0.0.1") ||
-    host.startsWith("0.0.0.0");
-
-  if (!isLocal && currentUrl !== BASE_URL) {
-    return res.redirect(301, `${BASE_URL}${req.originalUrl}`);
-  }
-
-  next();
-});
-
-// locals global untuk semua view
-app.use((req, res, next) => {
-  res.locals.BASE_URL = BASE_URL;
-  res.locals.currentPath = req.path;
-  res.locals.currentUrl = `${BASE_URL}${req.originalUrl}`;
-  next();
-});
-
-// noindex untuk area admin
-app.use("/admin", (req, res, next) => {
-  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
-  next();
-});
 
 // =========================
 // FILE UPLOAD
@@ -279,14 +237,6 @@ function escapeXml(text = "") {
     .replaceAll("'", "&apos;");
 }
 
-function toAbsoluteUrl(url = "") {
-  const value = safeText(url);
-  if (!value) return "";
-  if (/^https?:\/\//i.test(value)) return value;
-  if (value.startsWith("/")) return `${BASE_URL}${value}`;
-  return `${BASE_URL}/${value}`;
-}
-
 function sortProductsForDisplay(items = []) {
   return [...items].sort((a, b) => {
     if (Number(b.isFeatured) !== Number(a.isFeatured)) {
@@ -315,7 +265,10 @@ function getRelatedProducts(products, currentProduct, limit = 4) {
     return !sameCategory.some((item) => item.id === p.id);
   });
 
-  return [...sortProductsForDisplay(sameCategory), ...sortProductsForDisplay(fallbackOthers)].slice(0, limit);
+  return uniqueArray([
+    ...sortProductsForDisplay(sameCategory),
+    ...sortProductsForDisplay(fallbackOthers)
+  ]).slice(0, limit);
 }
 
 function getProducts() {
@@ -406,10 +359,7 @@ function productStructuredData(product) {
     "@type": "Product",
     name: product.name,
     description: firstNonEmpty(product.metaDescription, product.desc, product.shortDesc),
-    image: (product.images && product.images.length
-      ? product.images
-      : [product.image].filter(Boolean)
-    ).map(toAbsoluteUrl),
+    image: product.images && product.images.length ? product.images : [product.image].filter(Boolean),
     category: product.category || undefined,
     brand: {
       "@type": "Brand",
@@ -431,7 +381,7 @@ function articleStructuredData(article) {
     "@type": "Article",
     headline: article.title,
     description: firstNonEmpty(article.metaDescription, article.excerpt),
-    image: article.cover ? [toAbsoluteUrl(article.cover)] : undefined,
+    image: article.cover ? [article.cover] : undefined,
     author: {
       "@type": "Organization",
       name: "Teman Belanja"
@@ -586,7 +536,6 @@ app.get("/", (req, res) => {
     metaDescription:
       "Teman Belanja berisi rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.",
     canonical: `${BASE_URL}/`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     products,
     articles,
     structuredData
@@ -620,7 +569,6 @@ app.get("/produk", (req, res) => {
     metaDescription:
       "Kumpulan rekomendasi barang bagus di Teman Belanja lengkap dengan ulasan singkat, foto, dan panduan memilih.",
     canonical: `${BASE_URL}/produk`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     products,
     q,
     structuredData
@@ -635,8 +583,7 @@ app.get("/produk/:slug", (req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Produk Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`,
-      ogImage: `${BASE_URL}/LOGO.png`
+      canonical: `${BASE_URL}${req.originalUrl}`
     });
   }
 
@@ -657,7 +604,6 @@ app.get("/produk/:slug", (req, res) => {
       firstNonEmpty(product.metaDescription, product.shortDesc, product.desc, product.name)
     ),
     canonical: `${BASE_URL}/produk/${product.slug}`,
-    ogImage: toAbsoluteUrl(product.image) || `${BASE_URL}/LOGO.png`,
     product,
     related,
     structuredData
@@ -691,7 +637,6 @@ app.get("/artikel", (req, res) => {
     metaDescription:
       "Artikel Teman Belanja membahas rekomendasi barang bagus, tips memilih produk, review, dan panduan belanja yang mudah dipahami.",
     canonical: `${BASE_URL}/artikel`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     articles,
     q,
     structuredData
@@ -706,8 +651,7 @@ app.get("/artikel/:slug", (req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Artikel Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`,
-      ogImage: `${BASE_URL}/LOGO.png`
+      canonical: `${BASE_URL}${req.originalUrl}`
     });
   }
 
@@ -729,7 +673,6 @@ app.get("/artikel/:slug", (req, res) => {
     pageTitle: seoTitle(article.metaTitle || article.title),
     metaDescription: seoDescription(article.metaDescription || article.excerpt || article.title),
     canonical: `${BASE_URL}/artikel/${article.slug}`,
-    ogImage: toAbsoluteUrl(article.cover) || `${BASE_URL}/LOGO.png`,
     article,
     related,
     structuredData
@@ -758,8 +701,6 @@ app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
   res.send(`User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /admin/*
 Sitemap: ${BASE_URL}/sitemap.xml`);
 });
 
@@ -768,35 +709,16 @@ app.get("/sitemap.xml", (req, res) => {
   const articles = getArticles().filter((a) => a.active !== false);
 
   const urls = [
-    {
-      loc: `${BASE_URL}/`,
-      lastmod: new Date().toISOString(),
-      changefreq: "daily",
-      priority: "1.0"
-    },
-    {
-      loc: `${BASE_URL}/produk`,
-      lastmod: new Date().toISOString(),
-      changefreq: "daily",
-      priority: "0.9"
-    },
-    {
-      loc: `${BASE_URL}/artikel`,
-      lastmod: new Date().toISOString(),
-      changefreq: "daily",
-      priority: "0.9"
-    },
+    { loc: `${BASE_URL}/`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/produk`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/artikel`, lastmod: new Date().toISOString() },
     ...products.map((p) => ({
       loc: `${BASE_URL}/produk/${p.slug}`,
-      lastmod: p.updatedAt || p.createdAt || new Date().toISOString(),
-      changefreq: "weekly",
-      priority: "0.8"
+      lastmod: p.updatedAt || p.createdAt || new Date().toISOString()
     })),
     ...articles.map((a) => ({
       loc: `${BASE_URL}/artikel/${a.slug}`,
-      lastmod: a.updatedAt || a.createdAt || new Date().toISOString(),
-      changefreq: "weekly",
-      priority: "0.8"
+      lastmod: a.updatedAt || a.createdAt || new Date().toISOString()
     }))
   ];
 
@@ -804,12 +726,7 @@ app.get("/sitemap.xml", (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map((item) => {
-    return `  <url>
-    <loc>${escapeXml(item.loc)}</loc>
-    <lastmod>${escapeXml(item.lastmod)}</lastmod>
-    <changefreq>${escapeXml(item.changefreq)}</changefreq>
-    <priority>${escapeXml(item.priority)}</priority>
-  </url>`;
+    return `  <url><loc>${escapeXml(item.loc)}</loc><lastmod>${escapeXml(item.lastmod)}</lastmod></url>`;
   })
   .join("\n")}
 </urlset>`;
@@ -829,8 +746,7 @@ app.get("/admin/login", (req, res) => {
   res.render("admin-login", {
     pageTitle: "Login Admin",
     metaDescription: "Login admin Teman Belanja",
-    canonical: `${BASE_URL}/admin/login`,
-    ogImage: `${BASE_URL}/LOGO.png`
+    canonical: `${BASE_URL}/admin/login`
   });
 });
 
@@ -861,7 +777,6 @@ app.get("/admin", requireAdmin, (req, res) => {
     pageTitle: "Dashboard Admin",
     metaDescription: "Dashboard admin Teman Belanja",
     canonical: `${BASE_URL}/admin`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     totalProducts: getProducts().length,
     totalArticles: getArticles().length,
     totalOrders: getOrders().length
@@ -878,7 +793,6 @@ app.get("/admin/products", requireAdmin, (req, res) => {
     pageTitle: "Admin Produk",
     metaDescription: "Kelola rekomendasi produk",
     canonical: `${BASE_URL}/admin/products`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     products
   });
 });
@@ -888,7 +802,6 @@ app.get("/admin/products/new", requireAdmin, (req, res) => {
     pageTitle: "Tambah Produk",
     metaDescription: "Tambah rekomendasi produk",
     canonical: `${BASE_URL}/admin/products/new`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     product: null
   });
 });
@@ -967,7 +880,6 @@ app.get("/admin/products/edit/:id", requireAdmin, (req, res) => {
     pageTitle: "Edit Produk",
     metaDescription: "Edit rekomendasi produk",
     canonical: `${BASE_URL}/admin/products/edit/${product.id}`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     product
   });
 });
@@ -1075,7 +987,6 @@ app.get("/admin/articles", requireAdmin, (req, res) => {
     pageTitle: "Admin Artikel",
     metaDescription: "Kelola artikel SEO",
     canonical: `${BASE_URL}/admin/articles`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     articles
   });
 });
@@ -1085,7 +996,6 @@ app.get("/admin/articles/new", requireAdmin, (req, res) => {
     pageTitle: "Tambah Artikel",
     metaDescription: "Tambah artikel SEO",
     canonical: `${BASE_URL}/admin/articles/new`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     article: null
   });
 });
@@ -1134,7 +1044,6 @@ app.get("/admin/articles/edit/:id", requireAdmin, (req, res) => {
     pageTitle: "Edit Artikel",
     metaDescription: "Edit artikel SEO",
     canonical: `${BASE_URL}/admin/articles/edit/${article.id}`,
-    ogImage: `${BASE_URL}/LOGO.png`,
     article
   });
 });
@@ -1204,8 +1113,7 @@ app.use((req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Halaman Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`,
-      ogImage: `${BASE_URL}/LOGO.png`
+      canonical: `${BASE_URL}${req.originalUrl}`
     });
   }
 
