@@ -14,7 +14,7 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_ID = process.env.ADMIN_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
-const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.com").replace(/\/+$/, "");
+const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.store").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET || "teman-belanja-secret";
 
 const PUBLIC_DIR = path.join(__dirname, "public");
