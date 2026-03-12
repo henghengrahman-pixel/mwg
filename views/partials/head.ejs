@@ -2,8 +2,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="msvalidate.01" content="43CC602A8B6E2E6BD0D50A3334FD3C0A" />
-  <title><%= pageTitle %></title>
-  <meta name="description" content="<%= metaDescription %>" />
-  <link rel="canonical" href="<%= canonical %>" />
+
+  <title><%= pageTitle || "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja" %></title>
+  <meta
+    name="description"
+    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
+  />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="<%= canonical || BASE_URL %>" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Teman Belanja" />
+  <meta property="og:title" content="<%= pageTitle || 'Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja' %>" />
+  <meta
+    property="og:description"
+    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
+  />
+  <meta property="og:url" content="<%= canonical || BASE_URL %>" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= pageTitle || 'Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja' %>" />
+  <meta
+    name="twitter:description"
+    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
+  />
+
   <link rel="stylesheet" href="/css/style.css" />
+
+  <% if (Array.isArray(structuredData) && structuredData.length) { %>
+    <% structuredData.forEach(item => { %>
+      <script type="application/ld+json"><%- JSON.stringify(item) %></script>
+    <% }) %>
+  <% } %>
 </head>
