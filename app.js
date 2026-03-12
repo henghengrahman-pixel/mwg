@@ -78,11 +78,11 @@ app.use(
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false
-    }
+   cookie: {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production"
+}
   })
 );
 
