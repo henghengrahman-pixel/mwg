@@ -9,7 +9,6 @@
     <div class="container hero-wrap">
       <div class="hero-content">
         <span class="badge">Rekomendasi Produk & Tips Belanja</span>
-
         <h1>Teman Belanja</h1>
 
         <p class="hero-desc">
@@ -26,7 +25,7 @@
     </div>
   </section>
 
-  <% if (products && products.length) { %>
+  <% if (products && products.length > 0) { %>
     <section class="section container">
       <div class="section-head">
         <div>
@@ -37,8 +36,8 @@
       </div>
 
       <div class="grid-products">
-        <% products.slice(0,8).forEach(product => { %>
-          <% const coverImage = (product.images && product.images.length ? product.images[0] : product.image) || 'https://via.placeholder.com/800x800?text=Teman+Belanja'; %>
+        <% products.slice(0, 8).forEach(product => { %>
+          <% const coverImage = ((product.images && product.images.length > 0) ? product.images[0] : product.image) || "https://via.placeholder.com/800x800?text=Teman+Belanja"; %>
 
           <article class="card product-card">
             <a href="/produk/<%= product.slug %>" class="product-link">
@@ -51,7 +50,7 @@
               </div>
 
               <div class="product-card-body">
-                <% if(product.category){ %>
+                <% if (product.category) { %>
                   <span class="mini-category"><%= product.category %></span>
                 <% } %>
 
@@ -63,7 +62,7 @@
                   <span>Pilihan</span>
                 </div>
 
-                <% if(product.shortDesc){ %>
+                <% if (product.shortDesc) { %>
                   <p class="product-short"><%= product.shortDesc %></p>
                 <% } %>
 
@@ -71,10 +70,7 @@
               </div>
             </a>
 
-            <a
-              class="btn primary full"
-              href="/produk/<%= product.slug %>"
-            >
+            <a class="btn primary full" href="/produk/<%= product.slug %>">
               Lihat Produk
             </a>
           </article>
@@ -114,7 +110,7 @@
     </div>
   </section>
 
-  <% if (articles && articles.length) { %>
+  <% if (articles && articles.length > 0) { %>
     <section class="section container">
       <div class="section-head">
         <div>
@@ -125,7 +121,7 @@
       </div>
 
       <div class="grid-articles">
-        <% articles.slice(0,6).forEach(article => { %>
+        <% articles.slice(0, 6).forEach(article => { %>
           <article class="card article-card">
             <a href="/artikel/<%= article.slug %>">
               <img
@@ -133,11 +129,10 @@
                 alt="<%= article.title %>"
                 loading="lazy"
               />
-
               <h3><%= article.title %></h3>
             </a>
 
-            <% if(article.excerpt){ %>
+            <% if (article.excerpt) { %>
               <p><%= article.excerpt %></p>
             <% } %>
 
@@ -153,13 +148,11 @@
   <section class="section container">
     <div class="site-info">
       <h2>Tentang Teman Belanja</h2>
-
       <p>
         Teman Belanja membantu kamu menemukan berbagai barang menarik
         yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
         pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
       </p>
-
       <p>
         Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
         pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
