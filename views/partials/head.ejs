@@ -44,7 +44,7 @@
 
   <link rel="stylesheet" href="/css/style.css" />
 
-  <% if (Array.isArray(structuredData) && structuredData.length) { %>
+ <% if (typeof structuredData !== "undefined" && Array.isArray(structuredData) && structuredData.length) { %>
     <% structuredData.forEach(item => { %>
       <script type="application/ld+json"><%- JSON.stringify(item) %></script>
     <% }) %>
