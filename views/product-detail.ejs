@@ -78,14 +78,19 @@
               <span class="label">Kategori</span>
               <strong><%= safeCategory %></strong>
             </div>
-            <div class="quick-info-item">
-              <span class="label">Cocok Untuk</span>
-              <strong>Pria / Wanita</strong>
-            </div>
+
+            <% if (product.suitableFor) { %>
+              <div class="quick-info-item">
+                <span class="label">Cocok Untuk</span>
+                <strong><%= product.suitableFor %></strong>
+              </div>
+            <% } %>
+
             <div class="quick-info-item">
               <span class="label">Style</span>
               <strong>Modern & Trendy</strong>
             </div>
+
             <div class="quick-info-item">
               <span class="label">Pembelian</span>
               <strong>Via Shopee</strong>
