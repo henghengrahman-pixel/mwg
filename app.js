@@ -78,11 +78,11 @@ app.use(
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-   cookie: {
-  httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production"
-}
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
+    }
   })
 );
 
@@ -296,6 +296,7 @@ function getProducts() {
       slug: safeText(item.slug),
       price: Number(item.price || 0),
       category: safeText(item.category),
+      suitableFor: safeText(item.suitableFor),
       desc: safeText(item.desc),
       shortDesc: safeText(item.shortDesc),
       image: safeText(item.image) || images[0] || "",
@@ -419,6 +420,7 @@ function createSeedProducts() {
       slug: "tas-wanita-elegan-premium",
       price: 129000,
       category: "Fashion",
+      suitableFor: "Wanita",
       shortDesc: "Tas wanita elegan untuk harian dan kerja.",
       desc: "Tas wanita elegan dengan desain modern, muat banyak, cocok dipakai harian, kuliah, kerja, dan jalan santai. Material terlihat rapi dan modelnya mudah dipadukan dengan outfit kasual maupun formal.",
       image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
@@ -443,6 +445,7 @@ function createSeedProducts() {
       slug: "rak-serbaguna-minimalis",
       price: 89000,
       category: "Rumah Tangga",
+      suitableFor: "Pria / Wanita",
       shortDesc: "Rak minimalis untuk menyimpan barang lebih rapi.",
       desc: "Rak serbaguna minimalis yang membantu ruangan terasa lebih rapi dan hemat tempat. Cocok dipakai di dapur, kamar mandi, area laundry, maupun ruang kerja kecil.",
       image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
@@ -546,7 +549,15 @@ app.get("/produk", (req, res) => {
 
   if (q) {
     products = products.filter((p) =>
-      [p.name, p.category, p.focusKeyword, p.shortDesc, p.desc, ...(p.benefits || [])]
+      [
+        p.name,
+        p.category,
+        p.suitableFor,
+        p.focusKeyword,
+        p.shortDesc,
+        p.desc,
+        ...(p.benefits || [])
+      ]
         .join(" ")
         .toLowerCase()
         .includes(q)
@@ -842,6 +853,7 @@ app.post(
       slug,
       price: Number(req.body.price || 0),
       category: safeText(req.body.category),
+      suitableFor: safeText(req.body.suitableFor),
       shortDesc: safeText(req.body.shortDesc),
       desc: safeText(req.body.desc),
       image: images[0] || "",
@@ -945,6 +957,7 @@ app.post(
       slug,
       price: Number(req.body.price || 0),
       category: safeText(req.body.category),
+      suitableFor: safeText(req.body.suitableFor),
       shortDesc: safeText(req.body.shortDesc),
       desc: safeText(req.body.desc),
       image: images[0] || "",
