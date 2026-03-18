@@ -16,6 +16,7 @@ const ADMIN_ID = process.env.ADMIN_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
 const BASE_URL = (process.env.BASE_URL || "https://temanbelanja.store").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET || "teman-belanja-secret";
+const DEFAULT_PRODUCT_IMAGE = "https://via.placeholder.com/800x800?text=Teman+Belanja";
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 const VIEWS_DIR = path.join(__dirname, "views");
@@ -269,6 +270,36 @@ function getRelatedProducts(products, currentProduct, limit = 4) {
   ]).slice(0, limit);
 }
 
+function mergeImageSources({
+  imageLinks = [],
+  oldImages = [],
+  uploadedImages = [],
+  keepOldImages = false,
+  limit = 7
+}) {
+  const merged = uniqueArray([
+    ...imageLinks,
+    ...(keepOldImages ? oldImages : []),
+    ...uploadedImages
+  ]).slice(0, limit);
+
+  return merged.length ? merged : [DEFAULT_PRODUCT_IMAGE];
+}
+
+function mergeVideoSources({
+  videoLinks = [],
+  oldVideos = [],
+  uploadedVideos = [],
+  keepOldVideos = false,
+  limit = 3
+}) {
+  return uniqueArray([
+    ...videoLinks,
+    ...(keepOldVideos ? oldVideos : []),
+    ...uploadedVideos
+  ]).slice(0, limit);
+}
+
 function getProducts() {
   const products = readJson(PRODUCTS_FILE, []);
   return products.map((item) => {
@@ -423,8 +454,8 @@ function createSeedProducts() {
       suitableFor: "Wanita",
       shortDesc: "Tas wanita elegan untuk harian dan kerja.",
       desc: "Tas wanita elegan dengan desain modern, muat banyak, cocok dipakai harian, kuliah, kerja, dan jalan santai. Material terlihat rapi dan modelnya mudah dipadukan dengan outfit kasual maupun formal.",
-      image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
-      images: ["https://via.placeholder.com/800x800?text=Teman+Belanja"],
+      image: DEFAULT_PRODUCT_IMAGE,
+      images: [DEFAULT_PRODUCT_IMAGE],
       videos: [],
       affiliateUrl: "https://shopee.co.id/",
       sourceUrl: "https://shopee.co.id/",
@@ -448,8 +479,8 @@ function createSeedProducts() {
       suitableFor: "Pria / Wanita",
       shortDesc: "Rak minimalis untuk menyimpan barang lebih rapi.",
       desc: "Rak serbaguna minimalis yang membantu ruangan terasa lebih rapi dan hemat tempat. Cocok dipakai di dapur, kamar mandi, area laundry, maupun ruang kerja kecil.",
-      image: "https://via.placeholder.com/800x800?text=Teman+Belanja",
-      images: ["https://via.placeholder.com/800x800?text=Teman+Belanja"],
+      image: DEFAULT_PRODUCT_IMAGE,
+      images: [DEFAULT_PRODUCT_IMAGE],
       videos: [],
       affiliateUrl: "https://shopee.co.id/",
       sourceUrl: "https://shopee.co.id/",
@@ -836,12 +867,19 @@ app.post(
     const imageLinks = splitLinesToArray(req.body.imageLinks).slice(0, 7);
     const videoLinks = splitLinesToArray(req.body.videoLinks).slice(0, 3);
 
-    let images = uniqueArray([...uploadedImages, ...imageLinks]).slice(0, 7);
-    const videos = uniqueArray([...uploadedVideos, ...videoLinks]).slice(0, 3);
+    const images = mergeImageSources({
+      imageLinks,
+      uploadedImages,
+      keepOldImages: false,
+      limit: 7
+    });
 
-    if (images.length === 0) {
-      images = ["https://via.placeholder.com/800x800?text=Teman+Belanja"];
-    }
+    const videos = mergeVideoSources({
+      videoLinks,
+      uploadedVideos,
+      keepOldVideos: false,
+      limit: 3
+    });
 
     const baseSlug = makeSlug(name);
     const slug = uniqueSlug(baseSlug, products);
@@ -931,21 +969,21 @@ app.post(
 
     const oldVideos = Array.isArray(old.videos) ? old.videos : [];
 
-    let images = uniqueArray([
-      ...(keepOldImages ? oldImages : []),
-      ...uploadedImages,
-      ...imageLinks
-    ]).slice(0, 7);
+    const images = mergeImageSources({
+      imageLinks,
+      oldImages,
+      uploadedImages,
+      keepOldImages,
+      limit: 7
+    });
 
-    const videos = uniqueArray([
-      ...(keepOldVideos ? oldVideos : []),
-      ...uploadedVideos,
-      ...videoLinks
-    ]).slice(0, 3);
-
-    if (images.length === 0) {
-      images = old.image ? [old.image] : ["https://via.placeholder.com/800x800?text=Teman+Belanja"];
-    }
+    const videos = mergeVideoSources({
+      videoLinks,
+      oldVideos,
+      uploadedVideos,
+      keepOldVideos,
+      limit: 3
+    });
 
     const baseSlug = makeSlug(name);
     const slug = uniqueSlug(baseSlug, products, old.id);
