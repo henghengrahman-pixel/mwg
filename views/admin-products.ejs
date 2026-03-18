@@ -5,36 +5,122 @@
   <%- include("partials/header") %>
 
   <section class="section container">
-    <div class="section-head">
-      <h1>Kelola Produk Affiliate</h1>
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h1>Kelola Produk Affiliate</h1>
+        <p style="margin:6px 0 0;opacity:.8;">Atur produk, thumbnail, kategori, dan status tampil produk.</p>
+      </div>
       <a href="/admin/products/new" class="btn primary">+ Tambah Produk</a>
     </div>
 
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Gambar</th>
-          <th>Nama</th>
-          <th>Harga</th>
-          <th>Kategori</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% products.forEach(product => { %>
-          <tr>
-            <td><img src="<%= product.image %>" alt="<%= product.name %>" style="width:70px;"></td>
-            <td><%= product.name %></td>
-            <td><%= formatRupiah(product.price) %></td>
-            <td><%= product.category %></td>
-            <td>
-              <a href="/admin/products/edit/<%= product.id %>">Edit</a> |
-              <a href="/admin/products/delete/<%= product.id %>" onclick="return confirm('Hapus produk ini?')">Hapus</a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <% if (products && products.length) { %>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Gambar</th>
+              <th>Nama Produk</th>
+              <th>Harga</th>
+              <th>Kategori</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach((product) => { %>
+              <%
+                const thumb =
+                  (product.images && product.images.length ? product.images[0] : product.image) ||
+                  'https://via.placeholder.com/800x800?text=Teman+Belanja';
+              %>
+              <tr>
+                <td>
+                  <img
+                    src="<%= thumb %>"
+                    alt="<%= product.name %>"
+                    style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:1px solid #eee;"
+                  >
+                </td>
+
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:6px;min-width:220px;">
+                    <strong style="line-height:1.4;"><%= product.name %></strong>
+
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                      <% if (product.isFeatured) { %>
+                        <span style="font-size:12px;padding:4px 8px;border-radius:999px;background:#fff3e8;color:#ff6600;border:1px solid rgba(255,102,0,.15);">
+                          Unggulan
+                        </span>
+                      <% } %>
+
+                      <% if (product.suitableFor) { %>
+                        <span style="font-size:12px;padding:4px 8px;border-radius:999px;background:#f5f5f5;">
+                          <%= product.suitableFor %>
+                        </span>
+                      <% } %>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <strong><%= formatRupiah(product.price) %></strong>
+                </td>
+
+                <td>
+                  <%= product.category || '-' %>
+                </td>
+
+                <td>
+                  <% if (product.active) { %>
+                    <span style="display:inline-block;font-size:12px;padding:5px 10px;border-radius:999px;background:#ecfdf3;color:#067647;border:1px solid #b7ebc6;">
+                      Aktif
+                    </span>
+                  <% } else { %>
+                    <span style="display:inline-block;font-size:12px;padding:5px 10px;border-radius:999px;background:#fef3f2;color:#b42318;border:1px solid #f5c2c7;">
+                      Nonaktif
+                    </span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a
+                      href="/produk/<%= product.slug %>"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style="text-decoration:none;padding:7px 10px;border-radius:8px;background:#f5f5f5;"
+                    >
+                      Lihat
+                    </a>
+
+                    <a
+                      href="/admin/products/edit/<%= product.id %>"
+                      style="text-decoration:none;padding:7px 10px;border-radius:8px;background:#eef4ff;color:#1d4ed8;"
+                    >
+                      Edit
+                    </a>
+
+                    <a
+                      href="/admin/products/delete/<%= product.id %>"
+                      onclick="return confirm('Hapus produk ini?')"
+                      style="text-decoration:none;padding:7px 10px;border-radius:8px;background:#fff1f2;color:#be123c;"
+                    >
+                      Hapus
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="admin-box" style="text-align:center;">
+        <h3 style="margin-bottom:8px;">Belum ada produk</h3>
+        <p style="opacity:.8;margin-bottom:16px;">Tambahkan produk pertama kamu agar mulai tampil di website.</p>
+        <a href="/admin/products/new" class="btn primary">+ Tambah Produk</a>
+      </div>
+    <% } %>
   </section>
 
   <%- include("partials/footer") %>
