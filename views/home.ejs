@@ -36,8 +36,12 @@
       </div>
 
       <div class="grid-products">
-        <% products.slice(0, 8).forEach(product => { %>
-          <% const coverImage = ((product.images && product.images.length > 0) ? product.images[0] : product.image) || "https://via.placeholder.com/800x800?text=Teman+Belanja"; %>
+        <% products.slice(0, 8).forEach((product) => { %>
+          <%
+            const coverImage =
+              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
+              "https://via.placeholder.com/800x800?text=Teman+Belanja";
+          %>
 
           <article class="card product-card">
             <a href="/produk/<%= product.slug %>" class="product-link">
@@ -47,6 +51,14 @@
                   alt="<%= product.name %>"
                   loading="lazy"
                 />
+
+                <% if (product.isFeatured) { %>
+                  <span
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                  >
+                    Unggulan
+                  </span>
+                <% } %>
               </div>
 
               <div class="product-card-body">
@@ -60,6 +72,10 @@
                   <span>⭐ Produk</span>
                   <span>•</span>
                   <span>Pilihan</span>
+                  <% if (product.suitableFor) { %>
+                    <span>•</span>
+                    <span><%= product.suitableFor %></span>
+                  <% } %>
                 </div>
 
                 <% if (product.shortDesc) { %>
@@ -121,7 +137,7 @@
       </div>
 
       <div class="grid-articles">
-        <% articles.slice(0, 6).forEach(article => { %>
+        <% articles.slice(0, 6).forEach((article) => { %>
           <article class="card article-card">
             <a href="/artikel/<%= article.slug %>">
               <img
