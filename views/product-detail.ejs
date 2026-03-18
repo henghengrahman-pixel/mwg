@@ -5,42 +5,50 @@
 <body>
   <%- include("partials/header") %>
 
-  <% const mediaImages = product.images && product.images.length ? product.images : [product.image]; %>
-  <% const hasVideo = product.videos && product.videos.length; %>
-  <% const safeCategory = product.category || 'Produk Pilihan'; %>
-  <% const safeDesc = product.desc || 'Produk ini direkomendasikan karena kualitasnya baik dan banyak digunakan.'; %>
-  <% const safeShortDesc = product.shortDesc || ''; %>
+  <%
+    const mediaImages = Array.isArray(product.images) && product.images.length
+      ? product.images
+      : [product.image || 'https://via.placeholder.com/800x800?text=Teman+Belanja'];
+
+    const productVideos = Array.isArray(product.videos) ? product.videos.filter(Boolean) : [];
+    const hasVideo = productVideos.length > 0;
+    const safeCategory = product.category || 'Produk Pilihan';
+    const safeDesc = product.desc || 'Produk ini direkomendasikan karena kualitasnya baik dan banyak digunakan.';
+    const safeShortDesc = product.shortDesc || '';
+    const schemaImages = mediaImages.filter(Boolean);
+  %>
 
   <section class="section container product-detail-page">
     <div class="product-detail-grid">
       <div class="product-gallery-card">
         <div class="product-gallery">
-          <div class="main-media" onclick="openLightboxFromMain()">
+          <div class="main-media">
             <img
               id="mainPreview"
-              src="<%= mediaImages[0] || 'https://via.placeholder.com/800x800?text=Teman+Belanja' %>"
+              src="<%= mediaImages[0] %>"
               alt="<%= product.name %>"
               loading="lazy"
+              onclick="openLightboxFromMain()"
             />
           </div>
 
-          <% if ((product.images && product.images.length > 1) || hasVideo) { %>
+          <% if (mediaImages.length > 1 || hasVideo) { %>
             <div class="thumb-list">
               <% mediaImages.forEach((img, index) => { %>
                 <button
                   type="button"
                   class="thumb-btn <%= index === 0 ? 'active' : '' %>"
-                  onclick="changePreview('<%= img %>', 'image', <%= index %>, this)"
+                  onclick='changePreview(<%- JSON.stringify(img) %>, "image", <%= index %>, this)'
                 >
-                  <img src="<%= img %>" alt="<%= product.name %>" loading="lazy">
+                  <img src="<%= img %>" alt="<%= product.name %> <%= index + 1 %>" loading="lazy">
                 </button>
               <% }) %>
 
-              <% (product.videos || []).forEach(video => { %>
+              <% productVideos.forEach((video, videoIndex) => { %>
                 <button
                   type="button"
                   class="thumb-btn video-thumb"
-                  onclick="changePreview('<%= video %>', 'video', 0, this)"
+                  onclick='changePreview(<%- JSON.stringify(video) %>, "video", <%= videoIndex %>, this)'
                 >
                   <span>VIDEO</span>
                 </button>
@@ -105,14 +113,14 @@
 
           <div class="product-description">
             <h3>Deskripsi Produk</h3>
-            <p><%= safeDesc %></p>
+            <p style="white-space: pre-line;"><%= safeDesc %></p>
           </div>
 
           <% if (product.benefits && product.benefits.length) { %>
             <div class="product-benefits info-box">
               <h3>Kelebihan Produk</h3>
               <ul>
-                <% product.benefits.forEach(b => { %>
+                <% product.benefits.forEach((b) => { %>
                   <li><%= b %></li>
                 <% }) %>
               </ul>
@@ -123,7 +131,7 @@
             <div class="product-specs info-box">
               <h3>Spesifikasi</h3>
               <ul>
-                <% product.specs.forEach(s => { %>
+                <% product.specs.forEach((s) => { %>
                   <li><%= s %></li>
                 <% }) %>
               </ul>
@@ -149,6 +157,7 @@
             <a
               class="btn-buy-admin"
               target="_blank"
+              rel="noopener noreferrer"
               href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
             >
               💬 Minta Admin Checkoutkan
@@ -167,7 +176,7 @@
       </div>
 
       <div class="grid-products related-products-grid">
-        <% related.forEach(item => { %>
+        <% related.forEach((item) => { %>
           <article class="card product-card">
             <a href="/produk/<%= item.slug %>" class="product-link">
               <div class="product-thumb-wrap">
@@ -230,6 +239,7 @@
         <a
           class="mobile-buy-btn secondary"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
         >
           Admin
@@ -261,7 +271,7 @@
     let currentScale = 1;
 
     function clearActiveThumb() {
-      document.querySelectorAll(".thumb-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".thumb-btn").forEach((btn) => btn.classList.remove("active"));
     }
 
     function changePreview(src, type, index = 0, el = null) {
@@ -278,17 +288,18 @@
             Browser tidak mendukung video
           </video>
         `;
-      } else {
-        currentImageIndex = index;
-        container.innerHTML = `
-          <img
-            id="mainPreview"
-            src="${src}"
-            alt="Preview Produk"
-            onclick="openLightboxFromMain()"
-          />
-        `;
+        return;
       }
+
+      currentImageIndex = index;
+      container.innerHTML = `
+        <img
+          id="mainPreview"
+          src="${src}"
+          alt="Preview Produk"
+          onclick="openLightboxFromMain()"
+        />
+      `;
     }
 
     function openLightboxFromMain() {
@@ -296,7 +307,7 @@
       if (!mainPreview) return;
 
       const currentSrc = mainPreview.getAttribute("src");
-      const foundIndex = galleryImages.findIndex(img => img === currentSrc);
+      const foundIndex = galleryImages.findIndex((img) => img === currentSrc);
 
       if (foundIndex >= 0) {
         currentImageIndex = foundIndex;
@@ -308,6 +319,7 @@
     function openLightbox() {
       const lightbox = document.getElementById("imageLightbox");
       const lightboxImage = document.getElementById("lightboxImage");
+
       if (!lightbox || !lightboxImage || !galleryImages.length) return;
 
       lightboxImage.src = galleryImages[currentImageIndex] || galleryImages[0];
@@ -378,7 +390,7 @@
       lightboxImage.style.transform = `scale(${currentScale})`;
     }
 
-    document.addEventListener("keydown", function(e) {
+    document.addEventListener("keydown", function (e) {
       const lightbox = document.getElementById("imageLightbox");
       const isOpen = lightbox && lightbox.classList.contains("show");
 
@@ -394,28 +406,24 @@
   </script>
 
   <script type="application/ld+json">
-    {
-      "@context":"https://schema.org",
-      "@type":"Product",
-      "name":"<%= product.name %>",
-      "image":[
-        <% mediaImages.forEach((img, i) => { %>
-          "<%= img %>"<%= i < mediaImages.length - 1 ? "," : "" %>
-        <% }) %>
-      ],
-      "description":"<%= safeDesc || safeShortDesc || product.name %>",
-      "brand":{
-        "@type":"Brand",
-        "name":"Teman Belanja"
+    <%- JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      image: schemaImages,
+      description: safeDesc || safeShortDesc || product.name,
+      brand: {
+        "@type": "Brand",
+        name: "Teman Belanja"
       },
-      "offers":{
-        "@type":"Offer",
-        "priceCurrency":"IDR",
-        "price":"<%= product.price %>",
-        "availability":"https://schema.org/InStock",
-        "url":"<%= BASE_URL %>/produk/<%= product.slug %>"
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "IDR",
+        price: String(product.price || 0),
+        availability: "https://schema.org/InStock",
+        url: `${BASE_URL}/produk/${product.slug}`
       }
-    }
+    }) %>
   </script>
 
   <%- include("partials/footer") %>
