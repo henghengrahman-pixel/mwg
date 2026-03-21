@@ -1,21 +1,35 @@
 <%
-  const currentPath = typeof path !== "undefined" ? path : "";
+  const currentPath = typeof path !== "undefined" ? String(path) : "";
+  const cleanPath = currentPath.split("?")[0];
+
+  const isHome = cleanPath === "/";
+  const isProduk = cleanPath === "/produk" || cleanPath.startsWith("/produk/");
+  const isArtikel = cleanPath === "/artikel" || cleanPath.startsWith("/artikel/");
+  const isCewek = cleanPath === "/kategori/cewek" || cleanPath.startsWith("/kategori/cewek/");
+  const isCowok = cleanPath === "/kategori/cowok" || cleanPath.startsWith("/kategori/cowok/");
+  const isRumahTangga = cleanPath === "/kategori/rumah-tangga" || cleanPath.startsWith("/kategori/rumah-tangga/");
+  const isElektronik = cleanPath === "/kategori/elektronik" || cleanPath.startsWith("/kategori/elektronik/");
 %>
 
 <header class="topbar">
   <div class="container nav">
-    <a href="/" class="logo" aria-label="Teman Belanja">
-      <img src="/LOGO.png" alt="Teman Belanja - Rekomendasi Produk dan Review" loading="eager" />
+    <a href="/" class="logo" aria-label="Teman Belanja - Beranda">
+      <img
+        src="/LOGO.png"
+        alt="Teman Belanja - Rekomendasi Produk dan Review"
+        loading="eager"
+        decoding="async"
+      />
     </a>
 
     <nav class="main-menu" aria-label="Navigasi Utama">
-      <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Beranda</a>
-      <a href="/kategori/cewek" class="<%= currentPath.includes('/kategori/cewek') ? 'active' : '' %>">Cewek</a>
-      <a href="/kategori/cowok" class="<%= currentPath.includes('/kategori/cowok') ? 'active' : '' %>">Cowok</a>
-      <a href="/kategori/rumah-tangga" class="<%= currentPath.includes('/kategori/rumah-tangga') ? 'active' : '' %>">Rumah Tangga</a>
-      <a href="/kategori/elektronik" class="<%= currentPath.includes('/kategori/elektronik') ? 'active' : '' %>">Elektronik</a>
-      <a href="/produk" class="<%= currentPath === '/produk' || currentPath.startsWith('/produk/') ? 'active' : '' %>">Produk</a>
-      <a href="/artikel" class="<%= currentPath === '/artikel' || currentPath.startsWith('/artikel/') ? 'active' : '' %>">Artikel</a>
+      <a href="/" class="<%= isHome ? 'active' : '' %>">Beranda</a>
+      <a href="/kategori/cewek" class="<%= isCewek ? 'active' : '' %>">Cewek</a>
+      <a href="/kategori/cowok" class="<%= isCowok ? 'active' : '' %>">Cowok</a>
+      <a href="/kategori/rumah-tangga" class="<%= isRumahTangga ? 'active' : '' %>">Rumah Tangga</a>
+      <a href="/kategori/elektronik" class="<%= isElektronik ? 'active' : '' %>">Elektronik</a>
+      <a href="/produk" class="<%= isProduk ? 'active' : '' %>">Produk</a>
+      <a href="/artikel" class="<%= isArtikel ? 'active' : '' %>">Artikel</a>
     </nav>
   </div>
 </header>
