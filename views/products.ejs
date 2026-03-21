@@ -5,61 +5,125 @@
 <body>
   <%- include("partials/header") %>
 
+  <%
+    const safeProducts = Array.isArray(products) ? products : [];
+    const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeQuery = typeof q !== "undefined" ? q : "";
+    const activeCategorySlug = typeof kategoriSlug !== "undefined" ? kategoriSlug : "";
+    const activeCategoryName = typeof currentCategoryName !== "undefined" ? currentCategoryName : "";
+    const pageTitleText = activeCategoryName
+      ? `Produk ${activeCategoryName}`
+      : "Rekomendasi Barang Bagus";
+    const pageLeadText = activeCategoryName
+      ? `Temukan berbagai rekomendasi produk ${activeCategoryName.toLowerCase()} yang menarik, bermanfaat, dan layak dipertimbangkan untuk kebutuhan harian kamu.`
+      : "Temukan berbagai rekomendasi barang bagus untuk kebutuhan harian, rumah tangga, fashion, dan kategori lainnya. Kami merangkum produk pilihan yang layak dilihat berdasarkan fungsi, tampilan, dan nilai pakainya.";
+  %>
+
   <section class="section container products-page">
     <div class="page-head products-page-head">
       <div class="page-head-content">
-        <span class="pill">Rekomendasi Pilihan</span>
-        <h1>Rekomendasi Barang Bagus</h1>
+        <span class="pill"><%= activeCategoryName ? `Kategori ${activeCategoryName}` : "Rekomendasi Pilihan" %></span>
+        <h1><%= pageTitleText %></h1>
         <p class="page-lead">
-          Temukan berbagai rekomendasi barang bagus untuk kebutuhan harian, rumah tangga,
-          fashion, dan kategori lainnya. Kami merangkum produk pilihan yang layak dilihat
-          berdasarkan fungsi, tampilan, dan nilai pakainya.
+          <%= pageLeadText %>
         </p>
       </div>
     </div>
 
+    <% if (safeCategories.length > 0) { %>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+        <a
+          href="/produk"
+          class="pill"
+          style="<%= !activeCategorySlug ? 'background:#ff5a00;color:#fff;' : '' %>"
+        >
+          Semua
+        </a>
+
+        <% safeCategories.forEach((category) => { %>
+          <a
+            href="/kategori/<%= category.slug %>"
+            class="pill"
+            style="<%= activeCategorySlug === category.slug ? 'background:#ff5a00;color:#fff;' : '' %>"
+            aria-label="Lihat kategori <%= category.name %>"
+          >
+            <%= category.name %>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+
     <div class="products-toolbar">
       <form class="searchbar products-searchbar" method="get" action="/produk">
+        <% if (activeCategorySlug) { %>
+          <input type="hidden" name="kategoriSlug" value="<%= activeCategorySlug %>" />
+        <% } %>
+
         <input
           type="text"
           name="q"
-          placeholder="Cari produk bagus..."
-          value="<%= q || '' %>"
+          placeholder="<%= activeCategoryName ? `Cari produk ${activeCategoryName.toLowerCase()}...` : 'Cari produk bagus...' %>"
+          value="<%= safeQuery %>"
           aria-label="Cari produk"
         />
         <button type="submit" class="btn primary">Cari</button>
       </form>
 
       <div class="products-summary">
-        <% if (q) { %>
-          <p>Hasil pencarian untuk: <strong><%= q %></strong></p>
+        <% if (safeQuery && activeCategoryName) { %>
+          <p>
+            Hasil pencarian <strong><%= safeQuery %></strong> dalam kategori
+            <strong><%= activeCategoryName %></strong>:
+            <strong><%= safeProducts.length %></strong> produk
+          </p>
+        <% } else if (safeQuery) { %>
+          <p>
+            Hasil pencarian untuk: <strong><%= safeQuery %></strong> —
+            <strong><%= safeProducts.length %></strong> produk
+          </p>
+        <% } else if (activeCategoryName) { %>
+          <p>
+            Total produk kategori <strong><%= activeCategoryName %></strong>:
+            <strong><%= safeProducts.length %></strong> produk
+          </p>
         <% } else { %>
-          <p>Total rekomendasi: <strong><%= products ? products.length : 0 %></strong> produk</p>
+          <p>
+            Total rekomendasi: <strong><%= safeProducts.length %></strong> produk
+          </p>
         <% } %>
       </div>
     </div>
 
-    <% if (products && products.length) { %>
+    <% if (safeProducts.length > 0) { %>
       <div class="grid-products products-grid-list">
-        <% products.forEach((product) => { %>
+        <% safeProducts.forEach((product) => { %>
           <%
             const coverImage =
-              (product.images && product.images.length ? product.images[0] : product.image) ||
-              'https://via.placeholder.com/800x800?text=Teman+Belanja';
+              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
+              "https://via.placeholder.com/800x800?text=Teman+Belanja";
+
+            const safeName = product.name || "Produk Pilihan";
+            const safeCategory = product.category || "";
+            const safeShortDesc = product.shortDesc || "";
+            const safeSuitableFor = product.suitableFor || "";
+            const productUrl = `/produk/${product.slug}`;
+            const categoryUrl = safeCategory && product.categorySlug
+              ? `/kategori/${product.categorySlug}`
+              : "/produk";
           %>
 
           <article class="card product-card">
-            <a href="/produk/<%= product.slug %>" class="product-link">
-              <div class="product-thumb-wrap">
+            <a href="<%= productUrl %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+              <div class="product-thumb-wrap" style="position:relative;">
                 <img
                   src="<%= coverImage %>"
-                  alt="<%= product.name %>"
+                  alt="<%= safeName %>"
                   loading="lazy"
                 />
 
                 <% if (product.isFeatured) { %>
                   <span
-                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
                   >
                     Unggulan
                   </span>
@@ -67,50 +131,107 @@
               </div>
 
               <div class="product-card-body">
-                <% if (product.category) { %>
-                  <span class="mini-category"><%= product.category %></span>
+                <% if (safeCategory) { %>
+                  <span class="mini-category"><%= safeCategory %></span>
                 <% } %>
 
-                <h3><%= product.name %></h3>
+                <h3><%= safeName %></h3>
 
                 <div class="mini-meta">
                   <span>⭐ Produk</span>
                   <span>•</span>
                   <span>Pilihan</span>
-                  <% if (product.suitableFor) { %>
+                  <% if (safeSuitableFor) { %>
                     <span>•</span>
-                    <span><%= product.suitableFor %></span>
+                    <span><%= safeSuitableFor %></span>
                   <% } %>
                 </div>
 
-                <% if (product.shortDesc) { %>
-                  <p class="product-short"><%= product.shortDesc %></p>
+                <% if (safeShortDesc) { %>
+                  <p class="product-short"><%= safeShortDesc %></p>
                 <% } %>
 
                 <p class="price"><%= formatRupiah(product.price) %></p>
               </div>
             </a>
 
-            <a class="btn primary full" href="/produk/<%= product.slug %>">
-              Lihat Produk
-            </a>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <a class="btn primary full" href="<%= productUrl %>">
+                Lihat Produk
+              </a>
+
+              <% if (safeCategory && product.categorySlug) { %>
+                <a
+                  class="btn ghost full"
+                  href="<%= categoryUrl %>"
+                  aria-label="Lihat kategori <%= safeCategory %>"
+                >
+                  Kategori <%= safeCategory %>
+                </a>
+              <% } %>
+            </div>
           </article>
         <% }) %>
       </div>
     <% } else { %>
       <div class="empty-state card empty-products-state">
         <span class="pill">Belum ditemukan</span>
-        <h2>Produk belum tersedia</h2>
+
+        <h2>
+          <%= activeCategoryName
+            ? `Produk ${activeCategoryName} belum tersedia`
+            : "Produk belum tersedia" %>
+        </h2>
+
         <p>
-          Produk belum tersedia atau kata kunci yang kamu cari belum ditemukan.
-          Coba gunakan kata kunci lain yang lebih singkat dan lebih umum.
+          <% if (safeQuery && activeCategoryName) { %>
+            Produk dengan kata kunci <strong><%= safeQuery %></strong> pada kategori
+            <strong><%= activeCategoryName %></strong> belum ditemukan.
+          <% } else if (safeQuery) { %>
+            Produk dengan kata kunci <strong><%= safeQuery %></strong> belum ditemukan.
+            Coba gunakan kata kunci lain yang lebih singkat dan umum.
+          <% } else if (activeCategoryName) { %>
+            Saat ini belum ada produk yang dimasukkan ke kategori
+            <strong><%= activeCategoryName %></strong>.
+          <% } else { %>
+            Produk belum tersedia atau kata kunci yang kamu cari belum ditemukan.
+            Coba gunakan kata kunci lain yang lebih singkat dan lebih umum.
+          <% } %>
         </p>
 
         <div class="empty-actions">
           <a href="/produk" class="btn primary">Lihat Semua Produk</a>
-          <a href="/" class="btn ghost">Kembali ke Beranda</a>
+          <% if (activeCategorySlug) { %>
+            <a href="/kategori/<%= activeCategorySlug %>" class="btn ghost">Refresh Kategori</a>
+          <% } else { %>
+            <a href="/" class="btn ghost">Kembali ke Beranda</a>
+          <% } %>
         </div>
       </div>
+    <% } %>
+
+    <% if (safeCategories.length > 0) { %>
+      <section class="section" style="padding-bottom:0;">
+        <div class="site-info">
+          <h2>Jelajahi Kategori Produk</h2>
+          <p>
+            Teman Belanja merangkum berbagai rekomendasi produk dari beberapa kategori populer
+            agar kamu lebih mudah menemukan barang yang sesuai kebutuhan.
+          </p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+            <% safeCategories.forEach((category) => { %>
+              <a
+                href="/kategori/<%= category.slug %>"
+                class="pill"
+                aria-label="Buka kategori <%= category.name %>"
+              >
+                <%= category.name %>
+              </a>
+            <% }) %>
+          </div>
+        </div>
+      </section>
     <% } %>
   </section>
 
