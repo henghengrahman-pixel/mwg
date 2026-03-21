@@ -3,84 +3,154 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="msvalidate.01" content="43CC602A8B6E2E6BD0D50A3334FD3C0A" />
+  <meta name="p:domain_verify" content="6bb3f833f76f0999bdb704c17d7d8687" />
+  <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Teman Belanja" />
+  <meta name="publisher" content="Teman Belanja" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
 
   <%
     const siteName = "Teman Belanja";
-    const baseUrl =
+    const siteLocale = "id_ID";
+    const siteLanguage = "id-ID";
+
+    const normalizedBaseUrl =
       (typeof BASE_URL !== "undefined" && BASE_URL)
         ? String(BASE_URL).replace(/\/+$/, "")
         : "";
 
+    const reqPath =
+      (typeof path !== "undefined" && path)
+        ? String(path)
+        : "/";
+
+    const fallbackCanonical = normalizedBaseUrl
+      ? `${normalizedBaseUrl}${reqPath === "/" ? "" : reqPath}`
+      : reqPath;
+
     const currentCanonical =
       (typeof canonical !== "undefined" && canonical)
-        ? canonical
-        : (baseUrl || "/");
+        ? String(canonical)
+        : fallbackCanonical;
 
-    const defaultTitle =
-      "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja";
-
-    const defaultDescription =
-      "Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu sebelum membeli.";
+    const defaultTitle = "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja";
+    const defaultDescription = "Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu sebelum membeli.";
 
     const seoTitle =
       (typeof pageTitle !== "undefined" && pageTitle)
-        ? pageTitle
+        ? String(pageTitle).trim()
         : defaultTitle;
 
     const seoDescription =
       (typeof metaDescription !== "undefined" && metaDescription)
-        ? metaDescription
+        ? String(metaDescription).trim()
         : defaultDescription;
 
-    const seoImage =
+    const rawOgImage =
       (typeof ogImage !== "undefined" && ogImage)
-        ? ogImage
-        : (baseUrl ? `${baseUrl}/img/teman-belanja-cover.jpg` : "/img/teman-belanja-cover.jpg");
+        ? String(ogImage)
+        : "/img/teman-belanja-cover.jpg";
 
-    const currentUrl = currentCanonical;
+    const seoImage =
+      rawOgImage.startsWith("http://") || rawOgImage.startsWith("https://")
+        ? rawOgImage
+        : (normalizedBaseUrl ? `${normalizedBaseUrl}${rawOgImage}` : rawOgImage);
+
+    const currentUrl = currentCanonical.startsWith("http://") || currentCanonical.startsWith("https://")
+      ? currentCanonical
+      : (normalizedBaseUrl ? `${normalizedBaseUrl}${currentCanonical}` : currentCanonical);
+
+    const metaKeywords =
+      (typeof keywords !== "undefined" && keywords)
+        ? String(keywords)
+        : "teman belanja, rekomendasi produk, review barang, tips belanja, barang bagus, produk viral, fashion wanita, kebutuhan rumah tangga, rekomendasi belanja online";
+
+    const pageType =
+      (typeof ogType !== "undefined" && ogType)
+        ? String(ogType)
+        : "website";
   %>
 
   <title><%= seoTitle %></title>
   <meta name="description" content="<%= seoDescription %>" />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="author" content="Teman Belanja" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="format-detection" content="telephone=no" />
+  <meta name="keywords" content="<%= metaKeywords %>" />
   <link rel="canonical" href="<%= currentUrl %>" />
+  <meta name="language" content="<%= siteLanguage %>" />
 
+  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
 
-  <meta property="og:locale" content="id_ID" />
-  <meta property="og:type" content="website" />
+  <!-- Open Graph -->
+  <meta property="og:locale" content="<%= siteLocale %>" />
+  <meta property="og:type" content="<%= pageType %>" />
   <meta property="og:site_name" content="<%= siteName %>" />
   <meta property="og:title" content="<%= seoTitle %>" />
   <meta property="og:description" content="<%= seoDescription %>" />
   <meta property="og:url" content="<%= currentUrl %>" />
   <meta property="og:image" content="<%= seoImage %>" />
+  <meta property="og:image:secure_url" content="<%= seoImage %>" />
   <meta property="og:image:alt" content="<%= seoTitle %>" />
 
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="<%= seoTitle %>" />
   <meta name="twitter:description" content="<%= seoDescription %>" />
   <meta name="twitter:image" content="<%= seoImage %>" />
+  <meta name="twitter:image:alt" content="<%= seoTitle %>" />
+
+  <!-- Extra SEO -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
   <link rel="stylesheet" href="/css/style.css" />
 
+  <!-- Website Schema -->
   <script type="application/ld+json">
     <%- JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": `${normalizedBaseUrl || currentUrl}#website`,
       "name": siteName,
-      "url": baseUrl || currentUrl,
+      "url": normalizedBaseUrl || currentUrl,
+      "inLanguage": siteLanguage,
+      "publisher": {
+        "@type": "Organization",
+        "name": siteName,
+        "url": normalizedBaseUrl || currentUrl,
+        "logo": {
+          "@type": "ImageObject",
+          "url": normalizedBaseUrl ? `${normalizedBaseUrl}/img/logo.png` : "/img/logo.png"
+        }
+      },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": `${baseUrl}/search?q={search_term_string}`,
+        "target": `${normalizedBaseUrl}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string"
       }
+    }) %>
+  </script>
+
+  <!-- Organization Schema -->
+  <script type="application/ld+json">
+    <%- JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": `${normalizedBaseUrl || currentUrl}#organization`,
+      "name": siteName,
+      "url": normalizedBaseUrl || currentUrl,
+      "logo": normalizedBaseUrl ? `${normalizedBaseUrl}/img/logo.png` : "/img/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/",
+        "https://www.pinterest.com/"
+      ]
     }) %>
   </script>
 
