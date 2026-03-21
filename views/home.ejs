@@ -5,6 +5,23 @@
 <body>
   <%- include("partials/header") %>
 
+  <%
+    const safeProducts = Array.isArray(products) ? products : [];
+    const safeArticles = Array.isArray(articles) ? articles : [];
+
+    const categoryCounts = {};
+    safeProducts.forEach((item) => {
+      if (item && item.category) {
+        const key = String(item.category).trim();
+        if (key) categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+      }
+    });
+
+    const homeCategories = Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8);
+  %>
+
   <section class="hero">
     <div class="container hero-wrap">
       <div class="hero-content">
@@ -25,36 +42,65 @@
     </div>
   </section>
 
-  <% if (products && products.length > 0) { %>
+  <% if (homeCategories.length > 0) { %>
+    <section class="section container" style="padding-top:28px;padding-bottom:10px;">
+      <div class="section-head" style="margin-bottom:14px;">
+        <div>
+          <h2>Kategori Populer</h2>
+          <p class="section-subtitle">Pilih kategori produk yang ingin kamu lihat lebih cepat</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <% homeCategories.forEach(([categoryName, total]) => { %>
+          <a
+            href="/produk?kategori=<%= encodeURIComponent(categoryName) %>"
+            class="pill"
+            style="text-decoration:none;"
+            aria-label="Lihat produk kategori <%= categoryName %>"
+          >
+            <%= categoryName %> (<%= total %>)
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (safeProducts.length > 0) { %>
     <section class="section container">
       <div class="section-head">
         <div>
           <h2>Produk Rekomendasi</h2>
           <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
         </div>
-        <a href="/produk">Lihat semua</a>
+        <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua</a>
       </div>
 
       <div class="grid-products">
-        <% products.slice(0, 8).forEach((product) => { %>
+        <% safeProducts.slice(0, 8).forEach((product) => { %>
           <%
             const coverImage =
               ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
               "https://via.placeholder.com/800x800?text=Teman+Belanja";
+
+            const safeName = product.name || "Produk Pilihan";
+            const safeCategory = product.category || "";
+            const safeShortDesc = product.shortDesc || "";
+            const safeSuitableFor = product.suitableFor || "";
           %>
 
           <article class="card product-card">
-            <a href="/produk/<%= product.slug %>" class="product-link">
-              <div class="product-thumb-wrap">
+            <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+              <div class="product-thumb-wrap" style="position:relative;">
                 <img
                   src="<%= coverImage %>"
-                  alt="<%= product.name %>"
+                  alt="<%= safeName %>"
                   loading="lazy"
                 />
 
                 <% if (product.isFeatured) { %>
                   <span
-                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
                   >
                     Unggulan
                   </span>
@@ -62,27 +108,29 @@
               </div>
 
               <div class="product-card-body">
-                <% if (product.category) { %>
-                  <span class="mini-category"><%= product.category %></span>
+                <% if (safeCategory) { %>
+                  <span class="mini-category"><%= safeCategory %></span>
                 <% } %>
 
-                <h3><%= product.name %></h3>
+                <h3><%= safeName %></h3>
 
                 <div class="mini-meta">
                   <span>⭐ Produk</span>
                   <span>•</span>
                   <span>Pilihan</span>
-                  <% if (product.suitableFor) { %>
+                  <% if (safeSuitableFor) { %>
                     <span>•</span>
-                    <span><%= product.suitableFor %></span>
+                    <span><%= safeSuitableFor %></span>
                   <% } %>
                 </div>
 
-                <% if (product.shortDesc) { %>
-                  <p class="product-short"><%= product.shortDesc %></p>
+                <% if (safeShortDesc) { %>
+                  <p class="product-short"><%= safeShortDesc %></p>
                 <% } %>
 
-                <p class="price"><%= formatRupiah(product.price) %></p>
+                <% if (product.price) { %>
+                  <p class="price"><%= formatRupiah(product.price) %></p>
+                <% } %>
               </div>
             </a>
 
@@ -126,20 +174,20 @@
     </div>
   </section>
 
-  <% if (articles && articles.length > 0) { %>
+  <% if (safeArticles.length > 0) { %>
     <section class="section container">
       <div class="section-head">
         <div>
           <h2>Artikel Terbaru</h2>
           <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
         </div>
-        <a href="/artikel">Lihat semua</a>
+        <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua</a>
       </div>
 
       <div class="grid-articles">
-        <% articles.slice(0, 6).forEach((article) => { %>
+        <% safeArticles.slice(0, 6).forEach((article) => { %>
           <article class="card article-card">
-            <a href="/artikel/<%= article.slug %>">
+            <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= article.title %>">
               <img
                 src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
                 alt="<%= article.title %>"
