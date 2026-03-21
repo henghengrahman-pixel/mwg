@@ -1,26 +1,117 @@
 <!DOCTYPE html>
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
   <%- include("partials/header") %>
 
-  <section class="section container">
-    <h1>Artikel Teman Belanja</h1>
-    <form class="searchbar" method="get">
-      <input type="text" name="q" placeholder="Cari artikel..." value="<%= q %>" />
-      <button type="submit" class="btn primary">Cari</button>
-    </form>
+  <%
+    const safeArticles = Array.isArray(articles) ? articles : [];
+    const safeQuery = typeof q !== "undefined" ? q : "";
+  %>
 
-    <div class="grid-articles">
-      <% articles.forEach(article => { %>
-        <article class="card article-card">
-          <a href="/artikel/<%= article.slug %>">
-            <img src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Artikel+Teman+Belanja' %>" alt="<%= article.title %>" />
-            <h3><%= article.title %></h3>
-          </a>
-          <p><%= article.excerpt %></p>
-        </article>
-      <% }) %>
+  <section class="section container">
+    <div class="page-head">
+      <span class="pill">Artikel & Tips Belanja</span>
+      <h1>Artikel Teman Belanja</h1>
+      <p class="page-lead">
+        Temukan berbagai artikel seputar rekomendasi barang bagus, tips memilih produk,
+        review singkat, dan panduan belanja yang lebih mudah dipahami untuk kebutuhan sehari-hari.
+      </p>
+    </div>
+
+    <div class="products-toolbar">
+      <form class="searchbar products-searchbar" method="get" action="/artikel">
+        <input
+          type="text"
+          name="q"
+          placeholder="Cari artikel..."
+          value="<%= safeQuery %>"
+          aria-label="Cari artikel"
+        />
+        <button type="submit" class="btn primary">Cari</button>
+      </form>
+
+      <div class="products-summary">
+        <% if (safeQuery) { %>
+          <p>
+            Hasil pencarian untuk <strong><%= safeQuery %></strong>:
+            <strong><%= safeArticles.length %></strong> artikel
+          </p>
+        <% } else { %>
+          <p>
+            Total artikel: <strong><%= safeArticles.length %></strong>
+          </p>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (safeArticles.length > 0) { %>
+      <div class="grid-articles">
+        <% safeArticles.forEach((article) => { %>
+          <%
+            const safeTitle = article.title || "Artikel Teman Belanja";
+            const safeExcerpt = article.excerpt || "Baca artikel lengkap di Teman Belanja untuk mendapatkan informasi dan tips yang lebih jelas.";
+            const safeCover = article.cover || "https://via.placeholder.com/800x450?text=Artikel+Teman+Belanja";
+          %>
+
+          <article class="card article-card">
+            <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= safeTitle %>">
+              <img
+                src="<%= safeCover %>"
+                alt="<%= safeTitle %>"
+                loading="lazy"
+              />
+              <h3><%= safeTitle %></h3>
+            </a>
+
+            <p><%= safeExcerpt %></p>
+
+            <a class="btn ghost full" href="/artikel/<%= article.slug %>">
+              Baca Artikel
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state card empty-products-state">
+        <span class="pill">Artikel belum ditemukan</span>
+        <h2>Belum ada artikel yang cocok</h2>
+        <p>
+          <% if (safeQuery) { %>
+            Artikel dengan kata kunci <strong><%= safeQuery %></strong> belum ditemukan.
+            Coba gunakan kata kunci yang lebih umum atau lebih singkat.
+          <% } else { %>
+            Saat ini belum ada artikel yang ditampilkan.
+            Silakan cek kembali nanti atau jelajahi halaman produk yang tersedia.
+          <% } %>
+        </p>
+
+        <div class="empty-actions">
+          <a href="/artikel" class="btn primary">Lihat Semua Artikel</a>
+          <a href="/produk" class="btn ghost">Lihat Produk</a>
+        </div>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="section container" style="padding-top:0;">
+    <div class="site-info">
+      <h2>Baca Artikel dan Temukan Produk Pilihan</h2>
+      <p>
+        Artikel di Teman Belanja dibuat untuk membantu pengunjung memahami produk,
+        mengetahui tips belanja, dan menemukan rekomendasi barang yang lebih sesuai
+        dengan kebutuhan. Dengan membaca artikel terlebih dahulu, kamu bisa lebih mudah
+        menentukan pilihan sebelum membeli.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+        <a href="/produk" class="btn primary">Lihat Rekomendasi Produk</a>
+        <a href="/kategori/cewek" class="pill">Cewek</a>
+        <a href="/kategori/cowok" class="pill">Cowok</a>
+        <a href="/kategori/rumah-tangga" class="pill">Rumah Tangga</a>
+        <a href="/kategori/elektronik" class="pill">Elektronik</a>
+      </div>
     </div>
   </section>
 
