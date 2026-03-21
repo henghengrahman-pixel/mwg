@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include("partials/head") %>
+
+<body>
+  <%- include("partials/header") %>
+
+  <%
+    const safeProducts = Array.isArray(products) ? products : [];
+    const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeCategoryName = categoryName || "Kategori Produk";
+    const safeSlug = slug || "";
+  %>
+
+  <section class="section container">
+    <div class="page-head products-page-head">
+      <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:14px;">
+        <a href="/">Beranda</a>
+        <span aria-hidden="true">/</span>
+        <span><%= safeCategoryName %></span>
+      </nav>
+
+      <div class="page-head-content">
+        <span class="pill">Kategori Produk</span>
+        <h1><%= safeCategoryName %></h1>
+
+        <p class="page-lead">
+          Temukan rekomendasi produk
+          <strong><%= safeCategoryName.toLowerCase() %></strong>
+          terbaik di Teman Belanja. Halaman ini berisi pilihan produk yang telah dikurasi
+          agar lebih mudah dibandingkan, dilihat, dan dipilih sesuai kebutuhan.
+        </p>
+      </div>
+    </div>
+
+    <% if (safeCategories.length > 0) { %>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+        <a
+          href="/produk"
+          class="pill"
+          aria-label="Lihat semua produk"
+        >
+          Semua
+        </a>
+
+        <% safeCategories.forEach((category) => { %>
+          <a
+            href="/kategori/<%= category.slug %>"
+            class="pill"
+            style="<%= safeSlug === category.slug ? 'background:#ff5a00;color:#fff;' : '' %>"
+            aria-label="Lihat kategori <%= category.name %>"
+          >
+            <%= category.name %>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="products-toolbar">
+      <form class="searchbar products-searchbar" method="get" action="/produk">
+        <input type="hidden" name="kategoriSlug" value="<%= safeSlug %>" />
+        <input
+          type="text"
+          name="q"
+          placeholder="Cari produk <%= safeCategoryName.toLowerCase() %>..."
+          value=""
+          aria-label="Cari produk kategori <%= safeCategoryName %>"
+        />
+        <button type="submit" class="btn primary">Cari</button>
+      </form>
+
+      <div class="products-summary">
+        <p>
+          Total produk kategori <strong><%= safeCategoryName %></strong>:
+          <strong><%= safeProducts.length %></strong> produk
+        </p>
+      </div>
+    </div>
+
+    <% if (safeProducts.length > 0) { %>
+      <div class="section-head">
+        <div>
+          <h2>Pilihan Produk <%= safeCategoryName %></h2>
+          <p class="section-subtitle">
+            Kumpulan produk pilihan dalam kategori ini yang bisa langsung kamu cek detailnya.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-products products-grid-list">
+        <% safeProducts.forEach((product) => { %>
+          <%
+            const coverImage =
+              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
+              "https://via.placeholder.com/800x800?text=Teman+Belanja";
+
+            const safeName = product.name || "Produk Pilihan";
+            const safeProductCategory = product.category || safeCategoryName || "Produk Pilihan";
+            const safeShortDesc = product.shortDesc || "Lihat detail produk, review singkat, dan rekomendasi penggunaannya di Teman Belanja.";
+            const safeSuitableFor = product.suitableFor || "";
+            const productUrl = `/produk/${product.slug}`;
+          %>
+
+          <article class="card product-card">
+            <a href="<%= productUrl %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+              <div class="product-thumb-wrap" style="position:relative;">
+                <img
+                  src="<%= coverImage %>"
+                  alt="<%= safeName %> - <%= safeProductCategory %>"
+                  loading="lazy"
+                >
+
+                <% if (product.isFeatured) { %>
+                  <span
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                  >
+                    Unggulan
+                  </span>
+                <% } %>
+              </div>
+
+              <div class="product-card-body">
+                <span class="mini-category"><%= safeProductCategory %></span>
+
+                <h3><%= safeName %></h3>
+
+                <div class="mini-meta">
+                  <span>⭐ Produk</span>
+                  <span>•</span>
+                  <span>Pilihan</span>
+                  <% if (safeSuitableFor) { %>
+                    <span>•</span>
+                    <span><%= safeSuitableFor %></span>
+                  <% } %>
+                </div>
+
+                <p class="product-short"><%= safeShortDesc %></p>
+
+                <p class="price">
+                  <%= typeof formatRupiah === "function" ? formatRupiah(product.price || 0) : ('Rp ' + Number(product.price || 0).toLocaleString('id-ID')) %>
+                </p>
+              </div>
+            </a>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <a href="<%= productUrl %>" class="btn primary full">
+                Lihat Detail
+              </a>
+
+              <a href="/produk?kategoriSlug=<%= safeSlug %>" class="btn ghost full">
+                Lihat Semua <%= safeCategoryName %>
+              </a>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="site-info" style="margin-top:28px;">
+        <h2>Tentang Kategori <%= safeCategoryName %></h2>
+        <p>
+          Kategori <strong><%= safeCategoryName %></strong> di Teman Belanja dibuat
+          untuk memudahkan pengunjung menemukan produk yang lebih relevan dalam satu halaman.
+          Dengan struktur kategori yang rapi, pengunjung bisa membandingkan pilihan produk lebih cepat,
+          sementara mesin pencari juga lebih mudah memahami topik utama halaman ini.
+        </p>
+        <p>
+          Sebelum membeli, pastikan kamu melihat deskripsi produk, gambar, manfaat, spesifikasi,
+          dan detail lain di halaman produk. Dengan begitu, kamu bisa memilih barang yang lebih sesuai
+          dengan kebutuhan, budget, dan fungsi penggunaan sehari-hari.
+        </p>
+
+        <% if (safeCategories.length > 1) { %>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+            <% safeCategories.forEach((category) => { %>
+              <% if (category.slug !== safeSlug) { %>
+                <a
+                  href="/kategori/<%= category.slug %>"
+                  class="pill"
+                  aria-label="Buka kategori <%= category.name %>"
+                >
+                  <%= category.name %>
+                </a>
+              <% } %>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="card empty-products-state">
+        <span class="pill">Belum Ada Produk</span>
+        <h2>Produk untuk kategori <%= safeCategoryName %> belum tersedia</h2>
+        <p>
+          Saat ini belum ada produk yang ditampilkan di kategori
+          <strong><%= safeCategoryName %></strong>.
+          Silakan cek kategori lain atau kembali ke halaman produk untuk melihat rekomendasi lainnya.
+        </p>
+
+        <div class="empty-actions">
+          <a href="/produk" class="btn primary">Lihat Semua Produk</a>
+          <a href="/" class="btn ghost">Kembali ke Beranda</a>
+        </div>
+
+        <% if (safeCategories.length > 1) { %>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px;">
+            <% safeCategories.forEach((category) => { %>
+              <% if (category.slug !== safeSlug) { %>
+                <a
+                  href="/kategori/<%= category.slug %>"
+                  class="pill"
+                  aria-label="Buka kategori <%= category.name %>"
+                >
+                  <%= category.name %>
+                </a>
+              <% } %>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </section>
+
+  <%- include("partials/footer") %>
+</body>
+</html>
