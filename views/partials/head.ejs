@@ -6,13 +6,37 @@
 
   <%
     const siteName = "Teman Belanja";
-    const baseUrl = (typeof BASE_URL !== "undefined" && BASE_URL) ? String(BASE_URL).replace(/\/+$/, "") : "";
-    const currentCanonical = canonical || baseUrl || "/";
-    const defaultTitle = "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja";
-    const defaultDescription = "Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu sebelum membeli.";
-    const seoTitle = pageTitle || defaultTitle;
-    const seoDescription = metaDescription || defaultDescription;
-    const seoImage = ogImage || `${baseUrl}/img/teman-belanja-cover.jpg`;
+    const baseUrl =
+      (typeof BASE_URL !== "undefined" && BASE_URL)
+        ? String(BASE_URL).replace(/\/+$/, "")
+        : "";
+
+    const currentCanonical =
+      (typeof canonical !== "undefined" && canonical)
+        ? canonical
+        : (baseUrl || "/");
+
+    const defaultTitle =
+      "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja";
+
+    const defaultDescription =
+      "Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu sebelum membeli.";
+
+    const seoTitle =
+      (typeof pageTitle !== "undefined" && pageTitle)
+        ? pageTitle
+        : defaultTitle;
+
+    const seoDescription =
+      (typeof metaDescription !== "undefined" && metaDescription)
+        ? metaDescription
+        : defaultDescription;
+
+    const seoImage =
+      (typeof ogImage !== "undefined" && ogImage)
+        ? ogImage
+        : (baseUrl ? `${baseUrl}/img/teman-belanja-cover.jpg` : "/img/teman-belanja-cover.jpg");
+
     const currentUrl = currentCanonical;
   %>
 
@@ -24,14 +48,12 @@
   <meta name="format-detection" content="telephone=no" />
   <link rel="canonical" href="<%= currentUrl %>" />
 
-  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
 
-  <!-- Open Graph -->
   <meta property="og:locale" content="id_ID" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="<%= siteName %>" />
@@ -41,16 +63,13 @@
   <meta property="og:image" content="<%= seoImage %>" />
   <meta property="og:image:alt" content="<%= seoTitle %>" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="<%= seoTitle %>" />
   <meta name="twitter:description" content="<%= seoDescription %>" />
   <meta name="twitter:image" content="<%= seoImage %>" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css" />
 
-  <!-- Structured Data: Website -->
   <script type="application/ld+json">
     <%- JSON.stringify({
       "@context": "https://schema.org",
@@ -66,7 +85,7 @@
   </script>
 
   <% if (typeof structuredData !== "undefined" && Array.isArray(structuredData) && structuredData.length) { %>
-    <% structuredData.forEach(item => { %>
+    <% structuredData.forEach(function(item){ %>
       <script type="application/ld+json"><%- JSON.stringify(item) %></script>
     <% }) %>
   <% } %>
