@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
   <%- include("partials/header") %>
+
   <section class="section container">
-    <div class="admin-box">
-      <h1>404</h1>
-      <p>Halaman yang kamu cari tidak ditemukan.</p>
-      <a href="/" class="btn primary">Kembali ke Beranda</a>
+    <div class="site-info empty-products-state" style="max-width:820px;text-align:center;">
+      <span class="pill">404 - Halaman Tidak Ditemukan</span>
+
+      <h1 style="margin-top:14px;margin-bottom:12px;">Oops, halaman yang kamu cari tidak ditemukan</h1>
+
+      <p style="max-width:680px;margin:0 auto 18px;line-height:1.8;color:#666;">
+        Halaman yang kamu buka mungkin sudah dipindahkan, dihapus, atau alamat URL yang dimasukkan tidak tepat.
+        Kamu bisa kembali ke beranda, melihat semua produk, atau membaca artikel terbaru dari Teman Belanja.
+      </p>
+
+      <div class="empty-actions" style="justify-content:center;">
+        <a href="/" class="btn primary">Kembali ke Beranda</a>
+        <a href="/produk" class="btn ghost">Lihat Semua Produk</a>
+        <a href="/artikel" class="btn ghost">Baca Artikel</a>
+      </div>
+
+      <div style="margin-top:26px;padding-top:20px;border-top:1px solid #eee;">
+        <p style="margin:0 0 12px;color:#777;font-size:14px;">
+          Coba kunjungi kategori populer berikut:
+        </p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+          <a href="/kategori/cewek" class="pill">Cewek</a>
+          <a href="/kategori/cowok" class="pill">Cowok</a>
+          <a href="/kategori/rumah-tangga" class="pill">Rumah Tangga</a>
+          <a href="/kategori/elektronik" class="pill">Elektronik</a>
+        </div>
+      </div>
     </div>
   </section>
+
   <%- include("partials/footer") %>
 </body>
 </html>
