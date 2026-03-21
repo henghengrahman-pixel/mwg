@@ -1,15 +1,23 @@
-<header class="topbar">
-  <div class="container nav">
+<header class="site-header">
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <p class="topbar-text">Rekomendasi produk pilihan, review jujur, dan tips belanja cerdas setiap hari.</p>
+    </div>
+  </div>
 
-    <a href="/" class="logo">
-      <img src="/LOGO.png" alt="Teman Belanja">
+  <div class="container header-inner">
+    <a href="/" class="site-logo" aria-label="Teman Belanja">
+      <span class="site-logo-mark">TB</span>
+      <span class="site-logo-text">Teman Belanja</span>
     </a>
 
-    <nav>
-      <a href="/">Beranda</a>
-      <a href="/produk">Produk</a>
-      <a href="/artikel">Artikel</a>
+    <nav class="main-nav" aria-label="Navigasi Utama">
+      <a href="/" class="<%= path === '/' ? 'active' : '' %>">Home</a>
+      <a href="/kategori/cewek" class="<%= path && path.includes('/kategori/cewek') ? 'active' : '' %>">Cewek</a>
+      <a href="/kategori/cowok" class="<%= path && path.includes('/kategori/cowok') ? 'active' : '' %>">Cowok</a>
+      <a href="/kategori/rumah-tangga" class="<%= path && path.includes('/kategori/rumah-tangga') ? 'active' : '' %>">Rumah Tangga</a>
+      <a href="/kategori/elektronik" class="<%= path && path.includes('/kategori/elektronik') ? 'active' : '' %>">Elektronik</a>
+      <a href="/artikel" class="<%= path && path.includes('/artikel') ? 'active' : '' %>">Artikel</a>
     </nav>
-
   </div>
 </header>
