@@ -1,29 +1,126 @@
 <!DOCTYPE html>
 <html lang="id">
 <%- include("partials/head") %>
+
 <body>
   <%- include("partials/header") %>
 
+  <%
+    const safeTitle = article?.title || "Artikel Teman Belanja";
+    const safeExcerpt = article?.excerpt || "Baca artikel terbaru dan temukan rekomendasi serta tips belanja terbaik di Teman Belanja.";
+    const safeCover = article?.cover || "https://via.placeholder.com/1200x675?text=Artikel+Teman+Belanja";
+    const safeContent = article?.content || "";
+    const safeDate = article?.updatedAt || article?.createdAt || "";
+  %>
+
   <article class="section container article-detail">
-    <h1><%= article.title %></h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:14px;">
+      <a href="/">Beranda</a>
+      <span aria-hidden="true">/</span>
+      <a href="/artikel">Artikel</a>
+      <span aria-hidden="true">/</span>
+      <span><%= safeTitle %></span>
+    </nav>
+
+    <div class="page-head" style="margin-bottom:20px;">
+      <span class="pill">Artikel Teman Belanja</span>
+      <h1 style="margin-top:12px;"><%= safeTitle %></h1>
+
+      <% if (safeDate) { %>
+        <p class="section-subtitle" style="margin-top:8px;">
+          Update: <%= new Date(safeDate).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          }) %>
+        </p>
+      <% } %>
+
+      <p class="excerpt" style="margin-top:14px;"><%= safeExcerpt %></p>
+    </div>
+
     <% if (article.cover) { %>
-      <img class="article-cover" src="<%= article.cover %>" alt="<%= article.title %>" />
+      <img
+        class="article-cover"
+        src="<%= safeCover %>"
+        alt="<%= safeTitle %>"
+        loading="lazy"
+      />
     <% } %>
-    <p class="excerpt"><%= article.excerpt %></p>
-    <div class="content"><%- article.content.replace(/\n/g, "<br>") %></div>
+
+    <div class="content" style="margin-top:22px;">
+      <%- safeContent.replace(/\n/g, "<br>") %>
+    </div>
+
+    <div class="site-info" style="margin-top:30px;">
+      <h2>Tentang Artikel Ini</h2>
+      <p>
+        Artikel ini dibuat untuk membantu pembaca menemukan informasi yang lebih jelas,
+        mudah dipahami, dan relevan sebelum memilih produk atau memahami topik tertentu.
+        Teman Belanja berfokus pada rekomendasi produk, review singkat, dan tips belanja
+        yang lebih praktis untuk kebutuhan sehari-hari.
+      </p>
+      <p>
+        Kamu juga bisa menjelajahi halaman produk untuk melihat berbagai rekomendasi barang
+        bagus yang sudah dirangkum berdasarkan kategori, fungsi, dan kebutuhan pengguna.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+        <a href="/artikel" class="btn ghost">Lihat Semua Artikel</a>
+        <a href="/produk" class="btn primary">Lihat Rekomendasi Produk</a>
+      </div>
+    </div>
   </article>
 
-  <section class="section container">
-    <div class="section-head"><h2>Artikel Terkait</h2></div>
-    <div class="grid-articles">
-      <% related.forEach(item => { %>
-        <article class="card article-card">
-          <a href="/artikel/<%= item.slug %>">
-            <img src="<%= item.cover || 'https://via.placeholder.com/800x450?text=Artikel' %>" alt="<%= item.title %>" />
-            <h3><%= item.title %></h3>
-          </a>
-        </article>
-      <% }) %>
+  <% if (related && related.length) { %>
+    <section class="section container">
+      <div class="section-head">
+        <div>
+          <h2>Artikel Terkait</h2>
+          <p class="section-subtitle">Baca juga artikel lain yang masih berhubungan</p>
+        </div>
+      </div>
+
+      <div class="grid-articles">
+        <% related.forEach((item) => { %>
+          <article class="card article-card">
+            <a href="/artikel/<%= item.slug %>" aria-label="Baca artikel <%= item.title %>">
+              <img
+                src="<%= item.cover || 'https://via.placeholder.com/800x450?text=Artikel+Teman+Belanja' %>"
+                alt="<%= item.title %>"
+                loading="lazy"
+              />
+              <h3><%= item.title %></h3>
+            </a>
+
+            <% if (item.excerpt) { %>
+              <p><%= item.excerpt %></p>
+            <% } %>
+
+            <a class="btn ghost full" href="/artikel/<%= item.slug %>">
+              Baca Artikel
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="section container" style="padding-top:0;">
+    <div class="site-info">
+      <h2>Jelajahi Teman Belanja</h2>
+      <p>
+        Selain artikel, Teman Belanja juga menyediakan berbagai rekomendasi produk pilihan
+        dari kategori cewek, cowok, rumah tangga, dan elektronik. Semua disusun agar lebih
+        mudah dicari dan dibandingkan.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+        <a href="/kategori/cewek" class="pill">Cewek</a>
+        <a href="/kategori/cowok" class="pill">Cowok</a>
+        <a href="/kategori/rumah-tangga" class="pill">Rumah Tangga</a>
+        <a href="/kategori/elektronik" class="pill">Elektronik</a>
+      </div>
     </div>
   </section>
 
