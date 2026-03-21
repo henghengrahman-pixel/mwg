@@ -1,15 +1,28 @@
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="msvalidate.01" content="43CC602A8B6E2E6BD0D50A3334FD3C0A" />
 
-  <title><%= pageTitle || "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja" %></title>
-  <meta
-    name="description"
-    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
-  />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" href="<%= canonical || BASE_URL %>" />
+  <%
+    const siteName = "Teman Belanja";
+    const baseUrl = (typeof BASE_URL !== "undefined" && BASE_URL) ? String(BASE_URL).replace(/\/+$/, "") : "";
+    const currentCanonical = canonical || baseUrl || "/";
+    const defaultTitle = "Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja";
+    const defaultDescription = "Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu sebelum membeli.";
+    const seoTitle = pageTitle || defaultTitle;
+    const seoDescription = metaDescription || defaultDescription;
+    const seoImage = ogImage || `${baseUrl}/img/teman-belanja-cover.jpg`;
+    const currentUrl = currentCanonical;
+  %>
+
+  <title><%= seoTitle %></title>
+  <meta name="description" content="<%= seoDescription %>" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Teman Belanja" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="canonical" href="<%= currentUrl %>" />
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -19,32 +32,40 @@
   <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Open Graph -->
+  <meta property="og:locale" content="id_ID" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Teman Belanja" />
-  <meta
-    property="og:title"
-    content="<%= pageTitle || 'Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja' %>"
-  />
-  <meta
-    property="og:description"
-    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
-  />
-  <meta property="og:url" content="<%= canonical || BASE_URL %>" />
+  <meta property="og:site_name" content="<%= siteName %>" />
+  <meta property="og:title" content="<%= seoTitle %>" />
+  <meta property="og:description" content="<%= seoDescription %>" />
+  <meta property="og:url" content="<%= currentUrl %>" />
+  <meta property="og:image" content="<%= seoImage %>" />
+  <meta property="og:image:alt" content="<%= seoTitle %>" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta
-    name="twitter:title"
-    content="<%= pageTitle || 'Teman Belanja - Rekomendasi Barang Bagus, Review, dan Tips Belanja' %>"
-  />
-  <meta
-    name="twitter:description"
-    content="<%= metaDescription || 'Teman Belanja membahas rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.' %>"
-  />
+  <meta name="twitter:title" content="<%= seoTitle %>" />
+  <meta name="twitter:description" content="<%= seoDescription %>" />
+  <meta name="twitter:image" content="<%= seoImage %>" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css" />
 
- <% if (typeof structuredData !== "undefined" && Array.isArray(structuredData) && structuredData.length) { %>
+  <!-- Structured Data: Website -->
+  <script type="application/ld+json">
+    <%- JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": siteName,
+      "url": baseUrl || currentUrl,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${baseUrl}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    }) %>
+  </script>
+
+  <% if (typeof structuredData !== "undefined" && Array.isArray(structuredData) && structuredData.length) { %>
     <% structuredData.forEach(item => { %>
       <script type="application/ld+json"><%- JSON.stringify(item) %></script>
     <% }) %>
