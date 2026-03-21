@@ -195,6 +195,14 @@ function makeCategorySlug(category = "") {
     .replace(/^-+|-+$/g, "");
 }
 
+function formatCategoryNameFromSlug(slug = "") {
+  return String(slug || "")
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 function uniqueSlug(baseSlug, existingItems, currentId = null) {
   const initial = baseSlug || `item-${Date.now()}`;
   let slug = initial;
@@ -257,6 +265,34 @@ function sortProductsForDisplay(items = []) {
     const bUpdated = new Date(b.updatedAt || b.createdAt || 0).getTime();
     return bUpdated - aUpdated;
   });
+}
+
+function getKnownCategories(products = []) {
+  const staticCategories = [
+    { slug: "cewek", name: "Cewek" },
+    { slug: "cowok", name: "Cowok" },
+    { slug: "rumah-tangga", name: "Rumah Tangga" },
+    { slug: "elektronik", name: "Elektronik" }
+  ];
+
+  const dynamicCategories = uniqueArray(
+    products
+      .map((p) => safeText(p.categorySlug || makeCategorySlug(p.category)))
+      .filter(Boolean)
+  ).map((slug) => ({
+    slug,
+    name: formatCategoryNameFromSlug(slug)
+  }));
+
+  const merged = [...staticCategories];
+
+  dynamicCategories.forEach((item) => {
+    if (!merged.some((x) => x.slug === item.slug)) {
+      merged.push(item);
+    }
+  });
+
+  return merged;
 }
 
 function getRelatedProducts(products, currentProduct, limit = 4) {
@@ -571,9 +607,9 @@ app.get("/health", (req, res) => {
 // FRONTEND ROUTES
 // =========================
 app.get("/", (req, res) => {
-  const products = sortProductsForDisplay(
-    getProducts().filter((p) => p.active !== false)
-  ).slice(0, 12);
+  const allProducts = getProducts().filter((p) => p.active !== false);
+  const products = sortProductsForDisplay(allProducts).slice(0, 12);
+  const categories = getKnownCategories(allProducts);
 
   const articles = getArticles()
     .filter((a) => a.active !== false)
@@ -592,13 +628,21 @@ app.get("/", (req, res) => {
     path: req.originalUrl,
     products,
     articles,
+    categories,
     structuredData
   });
 });
 
 app.get("/produk", (req, res) => {
   const q = safeText(req.query.q).toLowerCase();
+  const kategoriParam = safeText(req.query.kategori);
+  const kategoriSlug = safeText(req.query.kategoriSlug || makeCategorySlug(kategoriParam)).toLowerCase();
+
   let products = getProducts().filter((p) => p.active !== false);
+
+  if (kategoriSlug) {
+    products = products.filter((p) => safeText(p.categorySlug).toLowerCase() === kategoriSlug);
+  }
 
   if (q) {
     products = products.filter((p) =>
@@ -620,39 +664,68 @@ app.get("/produk", (req, res) => {
 
   products = sortProductsForDisplay(products);
 
+  const categories = getKnownCategories(getProducts().filter((p) => p.active !== false));
+  const currentCategoryName =
+    categories.find((item) => item.slug === kategoriSlug)?.name || formatCategoryNameFromSlug(kategoriSlug);
+
+  const breadcrumbItems = [
+    { name: "Beranda", url: `${BASE_URL}/` },
+    { name: "Produk", url: `${BASE_URL}/produk` }
+  ];
+
+  if (kategoriSlug) {
+    breadcrumbItems.push({
+      name: currentCategoryName || "Kategori",
+      url: `${BASE_URL}/produk?kategoriSlug=${kategoriSlug}`
+    });
+  }
+
   const structuredData = [
-    breadcrumbStructuredData([
-      { name: "Beranda", url: `${BASE_URL}/` },
-      { name: "Produk", url: `${BASE_URL}/produk` }
-    ])
+    breadcrumbStructuredData(breadcrumbItems)
   ];
 
   res.render("products", {
-    pageTitle: seoTitle("Rekomendasi Barang Bagus"),
-    metaDescription:
-      "Kumpulan rekomendasi barang bagus di Teman Belanja lengkap dengan ulasan singkat, foto, dan panduan memilih.",
-    canonical: `${BASE_URL}/produk`,
+    pageTitle: seoTitle(
+      kategoriSlug
+        ? `Produk ${currentCategoryName || "Kategori"}`
+        : "Rekomendasi Barang Bagus"
+    ),
+    metaDescription: kategoriSlug
+      ? `Kumpulan produk ${String(currentCategoryName || "kategori").toLowerCase()} terbaik di Teman Belanja lengkap dengan ulasan singkat dan tips memilih.`
+      : "Kumpulan rekomendasi barang bagus di Teman Belanja lengkap dengan ulasan singkat, foto, dan panduan memilih.",
+    canonical: kategoriSlug
+      ? `${BASE_URL}/produk?kategoriSlug=${encodeURIComponent(kategoriSlug)}`
+      : `${BASE_URL}/produk`,
     path: req.originalUrl,
     products,
     q,
+    kategori: kategoriParam,
+    kategoriSlug,
+    currentCategoryName,
+    categories,
     structuredData
   });
 });
 
 app.get("/kategori/:slug", (req, res) => {
   const slug = safeText(req.params.slug).toLowerCase();
+  const allProducts = getProducts().filter((p) => p.active !== false);
+  const categories = getKnownCategories(allProducts);
 
-  const categoryMap = {
-    "cowok": "Cowok",
-    "cewek": "Cewek",
-    "rumah-tangga": "Rumah Tangga",
-    "elektronik": "Elektronik"
-  };
+  const knownCategory = categories.find((item) => item.slug === slug);
 
-  const categoryName = categoryMap[slug] || "Kategori Produk";
+  if (!knownCategory) {
+    return res.status(404).render("404", {
+      pageTitle: "Kategori Tidak Ditemukan",
+      metaDescription: "Kategori tidak ditemukan",
+      canonical: `${BASE_URL}${req.originalUrl}`,
+      path: req.originalUrl
+    });
+  }
 
-  let products = getProducts().filter((p) => p.active !== false);
-  products = products.filter((p) => safeText(p.categorySlug).toLowerCase() === slug);
+  const categoryName = knownCategory.name;
+
+  let products = allProducts.filter((p) => safeText(p.categorySlug).toLowerCase() === slug);
   products = sortProductsForDisplay(products);
 
   const structuredData = [
@@ -670,6 +743,7 @@ app.get("/kategori/:slug", (req, res) => {
     products,
     slug,
     categoryName,
+    categories,
     structuredData
   });
 });
@@ -824,19 +898,14 @@ Sitemap: ${BASE_URL}/sitemap.xml`);
 app.get("/sitemap.xml", (req, res) => {
   const products = getProducts().filter((p) => p.active !== false);
   const articles = getArticles().filter((a) => a.active !== false);
-
-  const categorySlugs = uniqueArray(
-    products
-      .map((p) => safeText(p.categorySlug || makeCategorySlug(p.category)))
-      .filter(Boolean)
-  );
+  const categories = getKnownCategories(products);
 
   const urls = [
     { loc: `${BASE_URL}/`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/produk`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/artikel`, lastmod: new Date().toISOString() },
-    ...categorySlugs.map((slug) => ({
-      loc: `${BASE_URL}/kategori/${slug}`,
+    ...categories.map((category) => ({
+      loc: `${BASE_URL}/kategori/${category.slug}`,
       lastmod: new Date().toISOString()
     })),
     ...products.map((p) => ({
@@ -1001,7 +1070,7 @@ app.post(
       specs: splitLinesToArray(req.body.specs),
       faq: [],
       isFeatured: boolFromForm(req.body.isFeatured),
-      active: boolFromForm(req.body.active),
+      active: req.body.active === undefined ? true : boolFromForm(req.body.active),
       createdAt: now,
       updatedAt: now
     };
@@ -1110,7 +1179,7 @@ app.post(
       specs: splitLinesToArray(req.body.specs),
       faq: Array.isArray(old.faq) ? old.faq : [],
       isFeatured: boolFromForm(req.body.isFeatured),
-      active: boolFromForm(req.body.active),
+      active: req.body.active === undefined ? old.active !== false : boolFromForm(req.body.active),
       updatedAt: now
     };
 
@@ -1174,7 +1243,7 @@ app.post("/admin/articles/new", requireAdmin, upload.single("coverFile"), (req, 
     keywords: safeText(req.body.keywords),
     metaTitle: safeText(req.body.metaTitle),
     metaDescription: safeText(req.body.metaDescription),
-    active: boolFromForm(req.body.active),
+    active: req.body.active === undefined ? true : boolFromForm(req.body.active),
     createdAt: now,
     updatedAt: now
   };
@@ -1229,7 +1298,7 @@ app.post("/admin/articles/edit/:id", requireAdmin, upload.single("coverFile"), (
     keywords: safeText(req.body.keywords),
     metaTitle: safeText(req.body.metaTitle),
     metaDescription: safeText(req.body.metaDescription),
-    active: boolFromForm(req.body.active),
+    active: req.body.active === undefined ? old.active !== false : boolFromForm(req.body.active),
     updatedAt: new Date().toISOString()
   };
 
