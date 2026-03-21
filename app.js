@@ -184,6 +184,17 @@ function makeSlug(text) {
   });
 }
 
+function makeCategorySlug(category = "") {
+  return String(category || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " dan ")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function uniqueSlug(baseSlug, existingItems, currentId = null) {
   const initial = baseSlug || `item-${Date.now()}`;
   let slug = initial;
@@ -249,15 +260,20 @@ function sortProductsForDisplay(items = []) {
 }
 
 function getRelatedProducts(products, currentProduct, limit = 4) {
-  const currentCategory = safeText(currentProduct.category).toLowerCase();
+  const currentCategorySlug = safeText(
+    currentProduct.categorySlug || currentProduct.category_slug || makeCategorySlug(currentProduct.category)
+  ).toLowerCase();
 
   const activeOthers = products.filter(
     (p) => p.active !== false && p.slug !== currentProduct.slug
   );
 
   const sameCategory = activeOthers.filter((p) => {
-    const category = safeText(p.category).toLowerCase();
-    return currentCategory && category === currentCategory;
+    const categorySlug = safeText(
+      p.categorySlug || p.category_slug || makeCategorySlug(p.category)
+    ).toLowerCase();
+
+    return currentCategorySlug && categorySlug === currentCategorySlug;
   });
 
   const fallbackOthers = activeOthers.filter((p) => {
@@ -320,13 +336,16 @@ function getProducts() {
       : splitLinesToArray(item.specs);
 
     const faq = Array.isArray(item.faq) ? item.faq : [];
+    const category = safeText(item.category);
+    const categorySlug = safeText(item.categorySlug || item.category_slug) || makeCategorySlug(category);
 
     return {
       ...item,
       name: safeText(item.name),
       slug: safeText(item.slug),
       price: Number(item.price || 0),
-      category: safeText(item.category),
+      category,
+      categorySlug,
       suitableFor: safeText(item.suitableFor),
       desc: safeText(item.desc),
       shortDesc: safeText(item.shortDesc),
@@ -450,7 +469,8 @@ function createSeedProducts() {
       name: "Tas Wanita Elegan Premium",
       slug: "tas-wanita-elegan-premium",
       price: 129000,
-      category: "Fashion",
+      category: "Cewek",
+      categorySlug: "cewek",
       suitableFor: "Wanita",
       shortDesc: "Tas wanita elegan untuk harian dan kerja.",
       desc: "Tas wanita elegan dengan desain modern, muat banyak, cocok dipakai harian, kuliah, kerja, dan jalan santai. Material terlihat rapi dan modelnya mudah dipadukan dengan outfit kasual maupun formal.",
@@ -463,7 +483,7 @@ function createSeedProducts() {
       metaDescription: "Review tas wanita elegan premium dengan desain cantik, ruang lega, dan cocok untuk aktivitas harian maupun kerja.",
       focusKeyword: "tas wanita elegan",
       benefits: ["Model elegan", "Cocok untuk harian", "Muatan cukup banyak"],
-      specs: ["Kategori: Fashion", "Warna mengikuti varian toko", "Cocok untuk aktivitas harian"],
+      specs: ["Kategori: Cewek", "Warna mengikuti varian toko", "Cocok untuk aktivitas harian"],
       faq: [],
       isFeatured: true,
       active: true,
@@ -476,6 +496,7 @@ function createSeedProducts() {
       slug: "rak-serbaguna-minimalis",
       price: 89000,
       category: "Rumah Tangga",
+      categorySlug: "rumah-tangga",
       suitableFor: "Pria / Wanita",
       shortDesc: "Rak minimalis untuk menyimpan barang lebih rapi.",
       desc: "Rak serbaguna minimalis yang membantu ruangan terasa lebih rapi dan hemat tempat. Cocok dipakai di dapur, kamar mandi, area laundry, maupun ruang kerja kecil.",
@@ -568,6 +589,7 @@ app.get("/", (req, res) => {
     metaDescription:
       "Teman Belanja berisi rekomendasi barang bagus, review jujur, tips memilih produk, dan artikel belanja yang membantu.",
     canonical: `${BASE_URL}/`,
+    path: req.originalUrl,
     products,
     articles,
     structuredData
@@ -583,6 +605,7 @@ app.get("/produk", (req, res) => {
       [
         p.name,
         p.category,
+        p.categorySlug,
         p.suitableFor,
         p.focusKeyword,
         p.shortDesc,
@@ -609,8 +632,44 @@ app.get("/produk", (req, res) => {
     metaDescription:
       "Kumpulan rekomendasi barang bagus di Teman Belanja lengkap dengan ulasan singkat, foto, dan panduan memilih.",
     canonical: `${BASE_URL}/produk`,
+    path: req.originalUrl,
     products,
     q,
+    structuredData
+  });
+});
+
+app.get("/kategori/:slug", (req, res) => {
+  const slug = safeText(req.params.slug).toLowerCase();
+
+  const categoryMap = {
+    "cowok": "Cowok",
+    "cewek": "Cewek",
+    "rumah-tangga": "Rumah Tangga",
+    "elektronik": "Elektronik"
+  };
+
+  const categoryName = categoryMap[slug] || "Kategori Produk";
+
+  let products = getProducts().filter((p) => p.active !== false);
+  products = products.filter((p) => safeText(p.categorySlug).toLowerCase() === slug);
+  products = sortProductsForDisplay(products);
+
+  const structuredData = [
+    breadcrumbStructuredData([
+      { name: "Beranda", url: `${BASE_URL}/` },
+      { name: categoryName, url: `${BASE_URL}/kategori/${slug}` }
+    ])
+  ];
+
+  res.render("kategori", {
+    pageTitle: seoTitle(`${categoryName} Terbaik`),
+    metaDescription: `Temukan rekomendasi produk ${categoryName.toLowerCase()} terbaik di Teman Belanja lengkap dengan review singkat dan tips memilih.`,
+    canonical: `${BASE_URL}/kategori/${slug}`,
+    path: req.originalUrl,
+    products,
+    slug,
+    categoryName,
     structuredData
   });
 });
@@ -623,18 +682,32 @@ app.get("/produk/:slug", (req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Produk Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`
+      canonical: `${BASE_URL}${req.originalUrl}`,
+      path: req.originalUrl
     });
   }
 
   const related = getRelatedProducts(products, product, 4);
 
+  const breadcrumbItems = [
+    { name: "Beranda", url: `${BASE_URL}/` },
+    { name: "Produk", url: `${BASE_URL}/produk` }
+  ];
+
+  if (product.categorySlug) {
+    breadcrumbItems.push({
+      name: product.category || "Kategori",
+      url: `${BASE_URL}/kategori/${product.categorySlug}`
+    });
+  }
+
+  breadcrumbItems.push({
+    name: product.name,
+    url: `${BASE_URL}/produk/${product.slug}`
+  });
+
   const structuredData = [
-    breadcrumbStructuredData([
-      { name: "Beranda", url: `${BASE_URL}/` },
-      { name: "Produk", url: `${BASE_URL}/produk` },
-      { name: product.name, url: `${BASE_URL}/produk/${product.slug}` }
-    ]),
+    breadcrumbStructuredData(breadcrumbItems),
     productStructuredData(product)
   ];
 
@@ -644,6 +717,7 @@ app.get("/produk/:slug", (req, res) => {
       firstNonEmpty(product.metaDescription, product.shortDesc, product.desc, product.name)
     ),
     canonical: `${BASE_URL}/produk/${product.slug}`,
+    path: req.originalUrl,
     product,
     related,
     structuredData
@@ -677,6 +751,7 @@ app.get("/artikel", (req, res) => {
     metaDescription:
       "Artikel Teman Belanja membahas rekomendasi barang bagus, tips memilih produk, review, dan panduan belanja yang mudah dipahami.",
     canonical: `${BASE_URL}/artikel`,
+    path: req.originalUrl,
     articles,
     q,
     structuredData
@@ -691,7 +766,8 @@ app.get("/artikel/:slug", (req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Artikel Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`
+      canonical: `${BASE_URL}${req.originalUrl}`,
+      path: req.originalUrl
     });
   }
 
@@ -713,6 +789,7 @@ app.get("/artikel/:slug", (req, res) => {
     pageTitle: seoTitle(article.metaTitle || article.title),
     metaDescription: seoDescription(article.metaDescription || article.excerpt || article.title),
     canonical: `${BASE_URL}/artikel/${article.slug}`,
+    path: req.originalUrl,
     article,
     related,
     structuredData
@@ -748,10 +825,20 @@ app.get("/sitemap.xml", (req, res) => {
   const products = getProducts().filter((p) => p.active !== false);
   const articles = getArticles().filter((a) => a.active !== false);
 
+  const categorySlugs = uniqueArray(
+    products
+      .map((p) => safeText(p.categorySlug || makeCategorySlug(p.category)))
+      .filter(Boolean)
+  );
+
   const urls = [
     { loc: `${BASE_URL}/`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/produk`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/artikel`, lastmod: new Date().toISOString() },
+    ...categorySlugs.map((slug) => ({
+      loc: `${BASE_URL}/kategori/${slug}`,
+      lastmod: new Date().toISOString()
+    })),
     ...products.map((p) => ({
       loc: `${BASE_URL}/produk/${p.slug}`,
       lastmod: p.updatedAt || p.createdAt || new Date().toISOString()
@@ -786,7 +873,8 @@ app.get("/admin/login", (req, res) => {
   res.render("admin-login", {
     pageTitle: "Login Admin",
     metaDescription: "Login admin Teman Belanja",
-    canonical: `${BASE_URL}/admin/login`
+    canonical: `${BASE_URL}/admin/login`,
+    path: req.originalUrl
   });
 });
 
@@ -817,6 +905,7 @@ app.get("/admin", requireAdmin, (req, res) => {
     pageTitle: "Dashboard Admin",
     metaDescription: "Dashboard admin Teman Belanja",
     canonical: `${BASE_URL}/admin`,
+    path: req.originalUrl,
     totalProducts: getProducts().length,
     totalArticles: getArticles().length,
     totalOrders: getOrders().length
@@ -833,6 +922,7 @@ app.get("/admin/products", requireAdmin, (req, res) => {
     pageTitle: "Admin Produk",
     metaDescription: "Kelola rekomendasi produk",
     canonical: `${BASE_URL}/admin/products`,
+    path: req.originalUrl,
     products
   });
 });
@@ -842,6 +932,7 @@ app.get("/admin/products/new", requireAdmin, (req, res) => {
     pageTitle: "Tambah Produk",
     metaDescription: "Tambah rekomendasi produk",
     canonical: `${BASE_URL}/admin/products/new`,
+    path: req.originalUrl,
     product: null
   });
 });
@@ -885,12 +976,16 @@ app.post(
     const slug = uniqueSlug(baseSlug, products);
     const now = new Date().toISOString();
 
+    const category = safeText(req.body.category);
+    const categorySlug = makeCategorySlug(category);
+
     const item = {
       id: crypto.randomUUID(),
       name,
       slug,
       price: Number(req.body.price || 0),
-      category: safeText(req.body.category),
+      category,
+      categorySlug,
       suitableFor: safeText(req.body.suitableFor),
       shortDesc: safeText(req.body.shortDesc),
       desc: safeText(req.body.desc),
@@ -928,6 +1023,7 @@ app.get("/admin/products/edit/:id", requireAdmin, (req, res) => {
     pageTitle: "Edit Produk",
     metaDescription: "Edit rekomendasi produk",
     canonical: `${BASE_URL}/admin/products/edit/${product.id}`,
+    path: req.originalUrl,
     product
   });
 });
@@ -989,12 +1085,16 @@ app.post(
     const slug = uniqueSlug(baseSlug, products, old.id);
     const now = new Date().toISOString();
 
+    const category = safeText(req.body.category);
+    const categorySlug = makeCategorySlug(category);
+
     products[index] = {
       ...old,
       name,
       slug,
       price: Number(req.body.price || 0),
-      category: safeText(req.body.category),
+      category,
+      categorySlug,
       suitableFor: safeText(req.body.suitableFor),
       shortDesc: safeText(req.body.shortDesc),
       desc: safeText(req.body.desc),
@@ -1036,6 +1136,7 @@ app.get("/admin/articles", requireAdmin, (req, res) => {
     pageTitle: "Admin Artikel",
     metaDescription: "Kelola artikel SEO",
     canonical: `${BASE_URL}/admin/articles`,
+    path: req.originalUrl,
     articles
   });
 });
@@ -1045,6 +1146,7 @@ app.get("/admin/articles/new", requireAdmin, (req, res) => {
     pageTitle: "Tambah Artikel",
     metaDescription: "Tambah artikel SEO",
     canonical: `${BASE_URL}/admin/articles/new`,
+    path: req.originalUrl,
     article: null
   });
 });
@@ -1093,6 +1195,7 @@ app.get("/admin/articles/edit/:id", requireAdmin, (req, res) => {
     pageTitle: "Edit Artikel",
     metaDescription: "Edit artikel SEO",
     canonical: `${BASE_URL}/admin/articles/edit/${article.id}`,
+    path: req.originalUrl,
     article
   });
 });
@@ -1162,7 +1265,8 @@ app.use((req, res) => {
     return res.status(404).render("404", {
       pageTitle: "Halaman Tidak Ditemukan",
       metaDescription: "Halaman tidak ditemukan",
-      canonical: `${BASE_URL}${req.originalUrl}`
+      canonical: `${BASE_URL}${req.originalUrl}`,
+      path: req.originalUrl
     });
   }
 
