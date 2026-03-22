@@ -1,230 +1,652 @@
 <!DOCTYPE html>
 <html lang="id">
-<%- include("partials/head") %>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  />
 
+  <title><%= currentProvider ? `${currentProvider.name} | ${settings.seoTitle || settings.siteName}` : (settings.seoTitle || settings.siteName || "Live Promo Center") %></title>
+  <meta
+    name="description"
+    content="<%= currentProvider ? `Katalog game dan promo ${currentProvider.name} dengan tampilan modern, cepat, dan mobile friendly.` : (settings.seoDescription || settings.siteDescription || 'Halaman promo dan katalog game modern') %>"
+  />
+  <meta
+    name="keywords"
+    content="<%= settings.seoKeywords || 'promo, katalog game, provider game, informasi game' %>"
+  />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#111111" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="<%= currentProvider ? `${currentProvider.name} | ${settings.siteName || 'Live Promo Center'}` : (settings.seoTitle || settings.siteName || 'Live Promo Center') %>" />
+  <meta property="og:description" content="<%= currentProvider ? `Katalog game dan promo ${currentProvider.name} dengan tampilan modern dan mobile friendly.` : (settings.seoDescription || settings.siteDescription || 'Halaman promo dan katalog game modern') %>" />
+  <meta property="og:image" content="<%= settings.logoUrl || (sliders[0] && sliders[0].imageUrl) || '/images/placeholder-cover.jpg' %>" />
+  <meta property="og:locale" content="id_ID" />
+
+  <link rel="canonical" href="/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+  />
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <style>
+    body {
+      background:
+        linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.8)),
+        url("<%= settings.heroBackground || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1600&auto=format&fit=crop' %>") center/cover fixed no-repeat;
+    }
+  </style>
+</head>
 <body>
-  <%- include("partials/header") %>
+  <div class="ambient-blur"></div>
 
-  <%
-    const safeProducts = Array.isArray(products) ? products : [];
-    const safeArticles = Array.isArray(articles) ? articles : [];
+  <div class="page-shell" id="top-page">
+    <div class="top-space"></div>
 
-    const categoryCounts = {};
-    safeProducts.forEach((item) => {
-      if (item && item.category) {
-        const key = String(item.category).trim();
-        if (key) categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+    <header class="brand-panel">
+      <div class="brand-head">
+        <a href="/" class="brand-logo-link" aria-label="Ke beranda">
+          <% if (settings.logoUrl) { %>
+            <img
+              src="<%= settings.logoUrl %>"
+              alt="<%= settings.siteName || 'Logo situs' %>"
+              class="brand-logo"
+              loading="eager"
+            />
+          <% } else { %>
+            <div class="brand-fallback"><%= settings.siteName || "Live Promo Center" %></div>
+          <% } %>
+        </a>
+      </div>
+
+      <div class="ticker-wrap">
+        <div class="ticker-label">Info</div>
+        <div class="ticker">
+          <div class="ticker-track">
+            <% const tickerText = settings.runningText || "Selamat datang di Live Promo Center"; %>
+            <% for (let i = 0; i < 6; i++) { %>
+              <span class="ticker-item"><%= tickerText %></span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="slider-card">
+      <div class="swiper heroSwiper">
+        <div class="swiper-wrapper">
+          <% if (sliders && sliders.length) { %>
+            <% sliders
+              .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+              .forEach((slide, index) => { %>
+              <div class="swiper-slide">
+                <div class="slide-media">
+                  <img
+                    src="<%= slide.imageUrl %>"
+                    alt="<%= slide.title || `Slide ${index + 1}` %>"
+                    loading="<%= index === 0 ? 'eager' : 'lazy' %>"
+                  />
+                </div>
+
+                <% if (slide.title || slide.subtitle || slide.buttonText) { %>
+                  <div class="slide-overlay">
+                    <div class="slide-copy">
+                      <% if (slide.title) { %>
+                        <h2><%= slide.title %></h2>
+                      <% } %>
+                      <% if (slide.subtitle) { %>
+                        <p><%= slide.subtitle %></p>
+                      <% } %>
+                    </div>
+
+                    <% if (slide.buttonText && slide.buttonLink) { %>
+                      <a class="slide-btn" href="<%= slide.buttonLink %>" target="_blank" rel="nofollow noopener">
+                        <%= slide.buttonText %>
+                      </a>
+                    <% } %>
+                  </div>
+                <% } %>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="swiper-slide">
+              <div class="slide-media">
+                <img
+                  src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1600&auto=format&fit=crop"
+                  alt="Slide utama"
+                  loading="eager"
+                />
+              </div>
+              <div class="slide-overlay">
+                <div class="slide-copy">
+                  <h2><%= settings.siteName || "Live Promo Center" %></h2>
+                  <p><%= settings.siteDescription || "Halaman promo dan katalog game modern" %></p>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+
+      <div class="cta-row">
+        <a
+          href="<%= settings.loginButtonLink || '#' %>"
+          class="cta-btn"
+          target="_blank"
+          rel="nofollow noopener"
+        >
+          Login
+        </a>
+        <a
+          href="<%= settings.daftarButtonLink || '#' %>"
+          class="cta-btn"
+          target="_blank"
+          rel="nofollow noopener"
+        >
+          Daftar
+        </a>
+      </div>
+    </section>
+
+    <section class="providers-shell">
+      <div class="providers-scroll">
+        <div class="provider-item">
+          <a href="/" class="provider-link <%= !currentProvider ? 'active' : '' %>">
+            <div class="provider-icon-wrap">
+              <% if (settings.logoUrl) { %>
+                <img src="<%= settings.logoUrl %>" alt="Semua provider" class="provider-icon" loading="lazy" />
+              <% } else { %>
+                <svg viewBox="0 0 24 24" fill="none" class="provider-icon" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              <% } %>
+            </div>
+            <div class="provider-name">Semua</div>
+          </a>
+        </div>
+
+        <% if (providers && providers.length) { %>
+          <% providers.forEach((provider) => { %>
+            <div class="provider-item">
+              <a
+                href="/provider/<%= provider.slug %>"
+                class="provider-link <%= currentProvider && currentProvider.slug === provider.slug ? 'active' : '' %>"
+              >
+                <div class="provider-icon-wrap">
+                  <% if (provider.logoUrl) { %>
+                    <img
+                      src="<%= provider.logoUrl %>"
+                      alt="<%= provider.name %>"
+                      class="provider-icon"
+                      loading="lazy"
+                    />
+                  <% } else { %>
+                    <svg viewBox="0 0 24 24" fill="none" class="provider-icon" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  <% } %>
+                </div>
+                <div class="provider-name"><%= provider.name %></div>
+              </a>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="content-panel" id="games-section">
+      <div class="panel-head">
+        <div class="panel-title-wrap">
+          <div class="panel-meta panel-meta-top">
+            <span class="meta-chip">
+              <span class="dot"></span>
+              <span>Update: <span id="update-date"><%= updateLabel %></span></span>
+            </span>
+          </div>
+
+          <h1>
+            <%= currentProvider ? `${currentProvider.name} Live Catalog` : "Live Promo & Game Catalog" %>
+          </h1>
+
+          <div class="panel-meta">
+            <span class="meta-chip">
+              <span>Data tampil dinamis</span>
+            </span>
+            <span class="meta-chip">
+              <span>Jakarta: <span id="jakarta-time"><%= jakartaNow %></span></span>
+            </span>
+          </div>
+
+          <% if (providers && providers.length) { %>
+            <div class="provider-top-filter">
+              <a href="/" class="provider-pill <%= !currentProvider ? 'active' : '' %>">
+                Semua
+              </a>
+              <% providers.slice(0, 8).forEach((provider) => { %>
+                <a
+                  href="/provider/<%= provider.slug %>"
+                  class="provider-pill <%= currentProvider && currentProvider.slug === provider.slug ? 'active' : '' %>"
+                >
+                  <% if (provider.logoUrl) { %>
+                    <img src="<%= provider.logoUrl %>" alt="<%= provider.name %>" loading="lazy" />
+                  <% } %>
+                  <span><%= provider.name %></span>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="panel-head-right">
+          <div class="live-badge">
+            <span class="pulse"></span>
+            <span>Realtime</span>
+          </div>
+
+          <button class="refresh-btn" id="refreshGamesBtn" type="button" aria-label="Refresh data">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 4v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 10a8 8 0 0 0-13.66-4.66L4 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 14a8 8 0 0 0 13.66 4.66L20 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <% if (games && games.length) { %>
+        <div class="games-grid" id="gamesGrid">
+          <% games
+            .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+            .forEach((game) => { %>
+            <article class="game-card">
+              <% if (game.labelBadge) { %>
+                <div class="game-badge"><%= game.labelBadge %></div>
+              <% } %>
+
+              <div class="game-inner">
+                <div class="game-media-wrap">
+                  <div class="game-media">
+                    <img
+                      src="<%= game.imageUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop' %>"
+                      alt="<%= game.title || 'Game image' %>"
+                      loading="lazy"
+                    />
+
+                    <a
+                      href="<%= game.gameLink || '#' %>"
+                      class="game-overlay-link"
+                      target="_blank"
+                      rel="nofollow noopener"
+                      aria-label="Buka <%= game.title %>"
+                    >
+                      <span class="play-chip"><span>Ayo Bermain</span></span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="game-side">
+                  <div class="pattern-box">
+                    <div class="pattern-head">
+                      <div class="pattern-title">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 19V5M10 19V9M16 19V12M22 19H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h3>Pola Slot:</h3>
+                      </div>
+
+                      <% if (game.providerLogoUrl) { %>
+                        <img
+                          src="<%= game.providerLogoUrl %>"
+                          alt="<%= game.providerName || 'Provider' %>"
+                          class="pattern-provider-logo"
+                          loading="lazy"
+                        />
+                      <% } %>
+                    </div>
+
+                    <div class="pattern-divider"></div>
+
+                    <div class="pattern-table">
+                      <% if (game.pattern && game.pattern.type === "pragmatic") { %>
+                        <% game.pattern.rows.forEach((row) => { %>
+                          <div class="pattern-row">
+                            <div class="pattern-label"><%= row.label %></div>
+                            <div class="pattern-icons">
+                              <span class="state-badge <%= row.state1 === '☑️' ? 'state-ok' : 'state-no' %>"><%= row.state1 %></span>
+                              <span class="state-badge <%= row.state2 === '☑️' ? 'state-ok' : 'state-no' %>"><%= row.state2 %></span>
+                              <span class="state-badge <%= row.state3 === '☑️' ? 'state-ok' : 'state-no' %>"><%= row.state3 %></span>
+                            </div>
+                          </div>
+                        <% }) %>
+                      <% } else if (game.pattern && game.pattern.rows) { %>
+                        <% game.pattern.rows.forEach((row) => { %>
+                          <div class="pattern-row">
+                            <div class="pattern-label"><%= row.label %> <%= row.turbo %></div>
+                          </div>
+                        <% }) %>
+                      <% } else { %>
+                        <div class="pattern-row">
+                          <div class="pattern-label">Data belum tersedia</div>
+                        </div>
+                      <% } %>
+                    </div>
+
+                    <div class="time-row">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      <span>Jam: <%= game.timeRange || "-" %></span>
+                    </div>
+
+                    <div class="score-box">
+                      <div
+                        class="score-fill <%= game.scoreClass || 'medium' %>"
+                        style="width:<%= game.score || 0 %>%"
+                      >
+                        <span><%= game.score || 0 %>%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <h3>Belum ada data game</h3>
+          <p>
+            Tambahkan provider dan game dari panel admin
+            <strong>/itsiregar8008</strong> agar katalog tampil di halaman ini.
+          </p>
+        </div>
+      <% } %>
+    </section>
+
+    <div class="footer-space"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="/" class="active">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 9.5V20h14V9.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <span>Home</span>
+      </a>
+
+      <a
+        href="<%= settings.promosiButtonLink || '#' %>"
+        target="_blank"
+        rel="nofollow noopener"
+      >
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3v18M8 7h6a3 3 0 0 1 0 6H10a3 3 0 1 0 0 6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Promosi</span>
+      </a>
+
+      <a
+        href="<%= settings.daftarButtonLink || '#' %>"
+        target="_blank"
+        rel="nofollow noopener"
+      >
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Daftar</span>
+      </a>
+
+      <a
+        href="<%= settings.contactButtonLink || '#' %>"
+        target="_blank"
+        rel="nofollow noopener"
+      >
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <span>Contact</span>
+      </a>
+    </div>
+  </nav>
+
+  <button class="to-top" id="toTopBtn" type="button" aria-label="Naik ke atas">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    const heroSwiper = new Swiper(".heroSwiper", {
+      loop: true,
+      speed: 900,
+      grabCursor: true,
+      effect: "creative",
+      autoplay: {
+        delay: 3200,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true
+      },
+      creativeEffect: {
+        prev: {
+          shadow: true,
+          translate: ["-18%", 0, -1],
+          rotate: [0, 18, 0]
+        },
+        next: {
+          translate: ["18%", 0, -1],
+          rotate: [0, -18, 0]
+        }
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true
+      },
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev"
       }
     });
 
-    const homeCategories = Object.entries(categoryCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8);
-  %>
+    const toTopBtn = document.getElementById("toTopBtn");
+    const refreshGamesBtn = document.getElementById("refreshGamesBtn");
+    const gamesGrid = document.getElementById("gamesGrid");
+    const jakartaTime = document.getElementById("jakarta-time");
+    const updateDate = document.getElementById("update-date");
 
-  <section class="hero">
-    <div class="container hero-wrap">
-      <div class="hero-content">
-        <span class="badge">Rekomendasi Produk & Tips Belanja</span>
-        <h1>Teman Belanja</h1>
+    function toggleTopButton() {
+      if (window.scrollY > 280) {
+        toTopBtn.classList.add("show");
+      } else {
+        toTopBtn.classList.remove("show");
+      }
+    }
 
-        <p class="hero-desc">
-          Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
-          review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
-          harian, rumah tangga, fashion, dan lainnya.
-        </p>
+    window.addEventListener("scroll", toggleTopButton);
+    toggleTopButton();
 
-        <div class="hero-actions">
-          <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
-          <a class="btn ghost" href="/artikel">Baca Artikel</a>
+    toTopBtn?.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    function stateClass(symbol) {
+      return symbol === "☑️" ? "state-ok" : "state-no";
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderPattern(pattern) {
+      if (!pattern || !Array.isArray(pattern.rows)) {
+        return `
+          <div class="pattern-row">
+            <div class="pattern-label">Data belum tersedia</div>
+          </div>
+        `;
+      }
+
+      if (pattern.type === "pragmatic") {
+        return pattern.rows.map((row) => `
+          <div class="pattern-row">
+            <div class="pattern-label">${escapeHtml(row.label)}</div>
+            <div class="pattern-icons">
+              <span class="state-badge ${stateClass(row.state1)}">${escapeHtml(row.state1)}</span>
+              <span class="state-badge ${stateClass(row.state2)}">${escapeHtml(row.state2)}</span>
+              <span class="state-badge ${stateClass(row.state3)}">${escapeHtml(row.state3)}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      return pattern.rows.map((row) => `
+        <div class="pattern-row">
+          <div class="pattern-label">${escapeHtml(row.label)} ${escapeHtml(row.turbo || "")}</div>
         </div>
-      </div>
-    </div>
-  </section>
+      `).join("");
+    }
 
-  <% if (homeCategories.length > 0) { %>
-    <section class="section container" style="padding-top:28px;padding-bottom:10px;">
-      <div class="section-head" style="margin-bottom:14px;">
-        <div>
-          <h2>Kategori Populer</h2>
-          <p class="section-subtitle">Pilih kategori produk yang ingin kamu lihat lebih cepat</p>
-        </div>
-      </div>
+    function renderGames(items) {
+      if (!gamesGrid) return;
 
-      <div style="display:flex;flex-wrap:wrap;gap:10px;">
-        <% homeCategories.forEach(([categoryName, total]) => { %>
-          <a
-            href="/produk?kategori=<%= encodeURIComponent(categoryName) %>"
-            class="pill"
-            style="text-decoration:none;"
-            aria-label="Lihat produk kategori <%= categoryName %>"
-          >
-            <%= categoryName %> (<%= total %>)
-          </a>
-        <% }) %>
-      </div>
-    </section>
-  <% } %>
+      if (!Array.isArray(items) || !items.length) {
+        gamesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column:1 / -1;">
+            <h3>Belum ada data game</h3>
+            <p>Tambahkan data game dari panel admin agar katalog tampil di halaman ini.</p>
+          </div>
+        `;
+        return;
+      }
 
-  <% if (safeProducts.length > 0) { %>
-    <section class="section container">
-      <div class="section-head">
-        <div>
-          <h2>Produk Rekomendasi</h2>
-          <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
-        </div>
-        <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua</a>
-      </div>
+      gamesGrid.innerHTML = items
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+        .map((game) => `
+          <article class="game-card">
+            ${game.labelBadge ? `<div class="game-badge">${escapeHtml(game.labelBadge)}</div>` : ""}
 
-      <div class="grid-products">
-        <% safeProducts.slice(0, 8).forEach((product) => { %>
-          <%
-            const coverImage =
-              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
-              "https://via.placeholder.com/800x800?text=Teman+Belanja";
-
-            const safeName = product.name || "Produk Pilihan";
-            const safeCategory = product.category || "";
-            const safeShortDesc = product.shortDesc || "";
-            const safeSuitableFor = product.suitableFor || "";
-          %>
-
-          <article class="card product-card">
-            <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
-              <div class="product-thumb-wrap" style="position:relative;">
-                <img
-                  src="<%= coverImage %>"
-                  alt="<%= safeName %>"
-                  loading="lazy"
-                />
-
-                <% if (product.isFeatured) { %>
-                  <span
-                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+            <div class="game-inner">
+              <div class="game-media-wrap">
+                <div class="game-media">
+                  <img
+                    src="${escapeHtml(game.imageUrl || "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop")}"
+                    alt="${escapeHtml(game.title || "Game image")}"
+                    loading="lazy"
+                  />
+                  <a
+                    href="${escapeHtml(game.gameLink || "#")}"
+                    class="game-overlay-link"
+                    target="_blank"
+                    rel="nofollow noopener"
+                    aria-label="Buka ${escapeHtml(game.title || "Game")}"
                   >
-                    Unggulan
-                  </span>
-                <% } %>
-              </div>
-
-              <div class="product-card-body">
-                <% if (safeCategory) { %>
-                  <span class="mini-category"><%= safeCategory %></span>
-                <% } %>
-
-                <h3><%= safeName %></h3>
-
-                <div class="mini-meta">
-                  <span>⭐ Produk</span>
-                  <span>•</span>
-                  <span>Pilihan</span>
-                  <% if (safeSuitableFor) { %>
-                    <span>•</span>
-                    <span><%= safeSuitableFor %></span>
-                  <% } %>
+                    <span class="play-chip"><span>Ayo Bermain</span></span>
+                  </a>
                 </div>
-
-                <% if (safeShortDesc) { %>
-                  <p class="product-short"><%= safeShortDesc %></p>
-                <% } %>
-
-                <% if (product.price) { %>
-                  <p class="price"><%= formatRupiah(product.price) %></p>
-                <% } %>
               </div>
-            </a>
 
-            <a class="btn primary full" href="/produk/<%= product.slug %>">
-              Lihat Produk
-            </a>
+              <div class="game-side">
+                <div class="pattern-box">
+                  <div class="pattern-head">
+                    <div class="pattern-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 19V5M10 19V9M16 19V12M22 19H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <h3>Pola Slot:</h3>
+                    </div>
+
+                    ${game.providerLogoUrl ? `
+                      <img
+                        src="${escapeHtml(game.providerLogoUrl)}"
+                        alt="${escapeHtml(game.providerName || "Provider")}"
+                        class="pattern-provider-logo"
+                        loading="lazy"
+                      />
+                    ` : ""}
+                  </div>
+
+                  <div class="pattern-divider"></div>
+
+                  <div class="pattern-table">
+                    ${renderPattern(game.pattern)}
+                  </div>
+
+                  <div class="time-row">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                      <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Jam: ${escapeHtml(game.timeRange || "-")}</span>
+                  </div>
+
+                  <div class="score-box">
+                    <div class="score-fill ${escapeHtml(game.scoreClass || "medium")}" style="width:${Number(game.score || 0)}%">
+                      <span>${Number(game.score || 0)}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </article>
-        <% }) %>
-      </div>
-    </section>
-  <% } %>
+        `)
+        .join("");
+    }
 
-  <section class="section container">
-    <div class="home-highlight-grid">
-      <div class="home-highlight-card">
-        <span class="pill">Belanja Lebih Mudah</span>
-        <h3>Produk Pilihan yang Sudah Dirangkum</h3>
-        <p>
-          Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu
-          menemukan produk menarik yang layak dicek lebih cepat.
-        </p>
-      </div>
+    async function refreshGames() {
+      try {
+        const providerSlug = <%- JSON.stringify(currentProvider ? currentProvider.slug : "") %>;
+        const query = providerSlug ? `?provider=${encodeURIComponent(providerSlug)}` : "";
+        const res = await fetch(`/api/games${query}`, { cache: "no-store" });
+        const data = await res.json();
 
-      <div class="home-highlight-card">
-        <span class="pill">Link Produk</span>
-        <h3>Langsung Cek Harga & Detail</h3>
-        <p>
-          Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa
-          langsung melihat harga terbaru, varian, dan stok produk.
-        </p>
-      </div>
+        if (data && data.success) {
+          renderGames(data.items || []);
+          if (jakartaTime) jakartaTime.textContent = data.jakarta?.fullDateTime || "";
+          if (updateDate) updateDate.textContent = data.jakarta?.fullDate || "";
+        }
+      } catch (err) {
+        console.error("Gagal refresh games:", err);
+      }
+    }
 
-      <div class="home-highlight-card">
-        <span class="pill">Tips Belanja</span>
-        <h3>Artikel Ringkas dan Mudah Dipahami</h3>
-        <p>
-          Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih
-          mudah menentukan pilihan yang cocok dengan kebutuhanmu.
-        </p>
-      </div>
-    </div>
-  </section>
+    async function refreshJakartaClock() {
+      try {
+        const res = await fetch("/api/jakarta-time", { cache: "no-store" });
+        const data = await res.json();
+        if (jakartaTime) jakartaTime.textContent = data.fullDateTime || "";
+        if (updateDate) updateDate.textContent = data.fullDate || "";
+      } catch (err) {
+        console.error("Gagal update jam Jakarta:", err);
+      }
+    }
 
-  <% if (safeArticles.length > 0) { %>
-    <section class="section container">
-      <div class="section-head">
-        <div>
-          <h2>Artikel Terbaru</h2>
-          <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
-        </div>
-        <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua</a>
-      </div>
+    refreshGamesBtn?.addEventListener("click", refreshGames);
 
-      <div class="grid-articles">
-        <% safeArticles.slice(0, 6).forEach((article) => { %>
-          <article class="card article-card">
-            <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= article.title %>">
-              <img
-                src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
-                alt="<%= article.title %>"
-                loading="lazy"
-              />
-              <h3><%= article.title %></h3>
-            </a>
-
-            <% if (article.excerpt) { %>
-              <p><%= article.excerpt %></p>
-            <% } %>
-
-            <a class="btn ghost full" href="/artikel/<%= article.slug %>">
-              Baca Artikel
-            </a>
-          </article>
-        <% }) %>
-      </div>
-    </section>
-  <% } %>
-
-  <section class="section container">
-    <div class="site-info">
-      <h2>Tentang Teman Belanja</h2>
-      <p>
-        Teman Belanja membantu kamu menemukan berbagai barang menarik
-        yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
-        pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
-      </p>
-      <p>
-        Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
-        pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
-        dengan lebih mudah.
-      </p>
-    </div>
-  </section>
-
-  <%- include("partials/footer") %>
+    setInterval(refreshJakartaClock, 15000);
+    setInterval(refreshGames, 45000);
+  </script>
 </body>
 </html>
