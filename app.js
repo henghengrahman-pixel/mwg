@@ -248,11 +248,31 @@ function firstNonEmpty(...values) {
 
 function escapeXml(text = "") {
   return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function absoluteUrl(url = "") {
+  const value = safeText(url);
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  if (value.startsWith("/")) return `${BASE_URL}${value}`;
+  return `${BASE_URL}/${value}`;
+}
+
+function getProductMainImage(product = {}) {
+  const candidates = [
+    product.image,
+    ...(Array.isArray(product.images) ? product.images : [])
+  ]
+    .map((item) => safeText(item))
+    .filter(Boolean);
+
+  const image = candidates[0] || DEFAULT_PRODUCT_IMAGE;
+  return absoluteUrl(image);
 }
 
 function sortProductsForDisplay(items = []) {
@@ -444,7 +464,9 @@ function productStructuredData(product) {
     "@type": "Product",
     name: product.name,
     description: firstNonEmpty(product.metaDescription, product.desc, product.shortDesc),
-    image: product.images && product.images.length ? product.images : [product.image].filter(Boolean),
+    image: product.images && product.images.length
+      ? product.images.map((img) => absoluteUrl(img))
+      : [absoluteUrl(product.image)].filter(Boolean),
     category: product.category || undefined,
     brand: {
       "@type": "Brand",
@@ -466,7 +488,7 @@ function articleStructuredData(article) {
     "@type": "Article",
     headline: article.title,
     description: firstNonEmpty(article.metaDescription, article.excerpt),
-    image: article.cover ? [article.cover] : undefined,
+    image: article.cover ? [absoluteUrl(article.cover)] : undefined,
     author: {
       "@type": "Organization",
       name: "Teman Belanja"
@@ -928,6 +950,55 @@ ${urls
 </urlset>`;
 
   res.type("application/xml");
+  res.send(xml);
+});
+
+app.get("/feed.xml", (req, res) => {
+  const products = getProducts()
+    .filter((p) => p.active !== false)
+    .filter((p) => safeText(p.name) && Number(p.price || 0) > 0);
+
+  const items = products
+    .map((p) => {
+      const productLink = `${BASE_URL}/produk/${p.slug}`;
+      const imageLink = getProductMainImage(p);
+      const description = firstNonEmpty(
+        p.metaDescription,
+        p.shortDesc,
+        p.desc,
+        p.name
+      );
+      const category = firstNonEmpty(p.category, formatCategoryNameFromSlug(p.categorySlug), "Produk");
+      const availability = "in stock";
+      const condition = "new";
+
+      return `    <item>
+      <g:id>${escapeXml(String(p.id || p.slug))}</g:id>
+      <title>${escapeXml(p.name)}</title>
+      <description>${escapeXml(description)}</description>
+      <link>${escapeXml(productLink)}</link>
+      <g:link>${escapeXml(productLink)}</g:link>
+      <g:image_link>${escapeXml(imageLink)}</g:image_link>
+      <g:availability>${availability}</g:availability>
+      <g:price>${Number(p.price || 0)} IDR</g:price>
+      <g:condition>${condition}</g:condition>
+      <g:brand>${escapeXml("Teman Belanja")}</g:brand>
+      <g:product_type>${escapeXml(category)}</g:product_type>
+    </item>`;
+    })
+    .join("\n");
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>Teman Belanja</title>
+    <link>${escapeXml(BASE_URL)}</link>
+    <description>Feed produk Teman Belanja untuk Google Merchant Center</description>
+${items}
+  </channel>
+</rss>`;
+
+  res.type("application/xml; charset=utf-8");
   res.send(xml);
 });
 
