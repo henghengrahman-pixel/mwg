@@ -255,6 +255,15 @@ function escapeXml(text = "") {
     .replace(/'/g, "&apos;");
 }
 
+function escapeHtml(text = "") {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function absoluteUrl(url = "") {
   const value = safeText(url);
   if (!value) return "";
@@ -514,6 +523,97 @@ function breadcrumbStructuredData(items = []) {
       item: item.url
     }))
   };
+}
+
+function legalPageHtml({
+  title,
+  description,
+  body
+}) {
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${safeTitle} | Teman Belanja</title>
+  <meta name="description" content="${safeDescription}" />
+  <link rel="canonical" href="${BASE_URL}" />
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#f6f8fb;
+      color:#1f2937;
+      line-height:1.7;
+    }
+    .wrap{
+      max-width:900px;
+      margin:40px auto;
+      background:#ffffff;
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+      padding:32px 24px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:32px;
+      line-height:1.2;
+      color:#0f172a;
+    }
+    h2{
+      margin-top:28px;
+      font-size:22px;
+      color:#111827;
+    }
+    p, li{
+      font-size:16px;
+      color:#374151;
+    }
+    ul{
+      padding-left:20px;
+    }
+    a{
+      color:#0f766e;
+      text-decoration:none;
+    }
+    a:hover{
+      text-decoration:underline;
+    }
+    .toplink{
+      display:inline-block;
+      margin-bottom:18px;
+      font-weight:700;
+    }
+    .muted{
+      color:#6b7280;
+      font-size:14px;
+      margin-top:10px;
+    }
+    @media (max-width: 640px){
+      .wrap{
+        margin:16px;
+        padding:22px 16px;
+      }
+      h1{
+        font-size:26px;
+      }
+      h2{
+        font-size:20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="toplink" href="${BASE_URL}">← Kembali ke Beranda</a>
+    ${body}
+    <p class="muted">Terakhir diperbarui: ${new Date().toLocaleDateString("id-ID")}</p>
+  </main>
+</body>
+</html>`;
 }
 
 function createSeedProducts() {
@@ -908,6 +1008,127 @@ app.get("/go/:id", (req, res) => {
 });
 
 // =========================
+// LEGAL / TRUST PAGES
+// =========================
+app.get("/tentang-kami", (req, res) => {
+  res.type("html").send(
+    legalPageHtml({
+      title: "Tentang Kami",
+      description: "Tentang Teman Belanja, website rekomendasi produk, review, dan tips belanja online.",
+      body: `
+        <h1>Tentang Kami</h1>
+        <p>Teman Belanja adalah website yang membahas rekomendasi produk, review singkat, dan tips belanja online agar pengunjung lebih mudah menemukan barang yang cocok sebelum membeli.</p>
+        <p>Kami mengumpulkan berbagai referensi produk dari marketplace dan toko online terpercaya, lalu menampilkannya dalam bentuk halaman produk, artikel, dan rekomendasi yang mudah dipahami.</p>
+        <h2>Fokus Kami</h2>
+        <ul>
+          <li>Rekomendasi produk yang sedang dicari banyak orang</li>
+          <li>Ulasan singkat dan mudah dipahami</li>
+          <li>Tips memilih produk sebelum membeli</li>
+          <li>Konten belanja yang rapi, jelas, dan bermanfaat</li>
+        </ul>
+        <h2>Model Layanan</h2>
+        <p>Teman Belanja dapat memperoleh komisi affiliate dari beberapa tautan produk yang tersedia di website. Harga produk bagi pembeli tetap mengikuti harga dari marketplace atau toko asal.</p>
+      `
+    })
+  );
+});
+
+app.get("/kontak", (req, res) => {
+  res.type("html").send(
+    legalPageHtml({
+      title: "Kontak",
+      description: "Halaman kontak Teman Belanja untuk pertanyaan, kerja sama, dan informasi umum.",
+      body: `
+        <h1>Kontak</h1>
+        <p>Jika Anda memiliki pertanyaan, masukan, atau ingin bekerja sama, silakan hubungi Teman Belanja melalui informasi berikut.</p>
+        <h2>Informasi Kontak</h2>
+        <p>Email: <a href="mailto:admin@temanbelanja.store">admin@temanbelanja.store</a></p>
+        <p>Website: <a href="${BASE_URL}">${BASE_URL}</a></p>
+        <h2>Keperluan yang Bisa Dihubungi</h2>
+        <ul>
+          <li>Pertanyaan seputar konten website</li>
+          <li>Laporan tautan produk yang tidak aktif</li>
+          <li>Kerja sama promosi atau kolaborasi</li>
+          <li>Masukan untuk pengembangan Teman Belanja</li>
+        </ul>
+        <p>Untuk pertanyaan terkait pesanan, pembayaran, pengiriman, atau pengembalian barang, silakan hubungi marketplace atau toko tempat produk dibeli.</p>
+      `
+    })
+  );
+});
+
+app.get("/kebijakan-privasi", (req, res) => {
+  res.type("html").send(
+    legalPageHtml({
+      title: "Kebijakan Privasi",
+      description: "Kebijakan privasi Teman Belanja mengenai penggunaan data pengunjung website.",
+      body: `
+        <h1>Kebijakan Privasi</h1>
+        <p>Teman Belanja menghargai privasi setiap pengunjung website. Halaman ini menjelaskan secara ringkas bagaimana informasi pengunjung digunakan.</p>
+        <h2>Informasi yang Dikumpulkan</h2>
+        <p>Kami dapat mengumpulkan informasi non-pribadi seperti halaman yang dikunjungi, perangkat yang digunakan, serta data analitik untuk membantu meningkatkan performa website.</p>
+        <h2>Penggunaan Data</h2>
+        <ul>
+          <li>Meningkatkan kualitas konten dan pengalaman pengguna</li>
+          <li>Menganalisis performa halaman dan produk</li>
+          <li>Menjaga keamanan website</li>
+        </ul>
+        <h2>Cookie</h2>
+        <p>Website ini dapat menggunakan cookie atau teknologi serupa untuk analitik, performa, dan pengalaman pengguna yang lebih baik.</p>
+        <h2>Tautan Pihak Ketiga</h2>
+        <p>Teman Belanja dapat menampilkan tautan ke marketplace atau website pihak ketiga. Kebijakan privasi pada website pihak ketiga mengikuti aturan masing-masing penyedia layanan tersebut.</p>
+        <h2>Persetujuan</h2>
+        <p>Dengan menggunakan website ini, Anda dianggap memahami dan menyetujui kebijakan privasi ini.</p>
+      `
+    })
+  );
+});
+
+app.get("/kebijakan-pengembalian", (req, res) => {
+  res.type("html").send(
+    legalPageHtml({
+      title: "Kebijakan Pengembalian",
+      description: "Kebijakan pengembalian produk Teman Belanja untuk keperluan verifikasi Merchant Center.",
+      body: `
+        <h1>Kebijakan Pengembalian</h1>
+        <p>Teman Belanja adalah website rekomendasi produk dan affiliate. Sebagian besar transaksi pembelian dilakukan melalui marketplace atau toko pihak ketiga yang ditautkan dari halaman produk.</p>
+        <h2>Ketentuan Pengembalian</h2>
+        <p>Pengembalian, penukaran barang, pengajuan komplain, serta proses refund mengikuti kebijakan resmi dari marketplace atau toko tempat pembelian dilakukan.</p>
+        <h2>Barang Rusak atau Tidak Sesuai</h2>
+        <p>Jika barang yang diterima rusak, cacat, tidak lengkap, atau tidak sesuai deskripsi, pembeli dapat mengajukan komplain dan pengembalian melalui platform tempat transaksi dilakukan sesuai syarat yang berlaku di sana.</p>
+        <h2>Biaya Pengembalian</h2>
+        <p>Biaya pengembalian, jika ada, mengikuti kebijakan masing-masing marketplace, penjual, atau jasa pengiriman yang digunakan.</p>
+        <h2>Bantuan</h2>
+        <p>Jika Anda menemukan tautan produk yang bermasalah di Teman Belanja, silakan hubungi kami melalui halaman kontak agar dapat kami tinjau.</p>
+      `
+    })
+  );
+});
+
+app.get("/syarat-dan-ketentuan", (req, res) => {
+  res.type("html").send(
+    legalPageHtml({
+      title: "Syarat dan Ketentuan",
+      description: "Syarat dan ketentuan penggunaan website Teman Belanja.",
+      body: `
+        <h1>Syarat dan Ketentuan</h1>
+        <p>Dengan mengakses dan menggunakan website Teman Belanja, Anda dianggap telah memahami dan menyetujui syarat dan ketentuan berikut.</p>
+        <h2>Informasi Produk</h2>
+        <p>Teman Belanja menampilkan rekomendasi, referensi, dan informasi produk. Kami berusaha menjaga informasi tetap akurat, namun detail harga, stok, varian, dan ketersediaan dapat berubah sewaktu-waktu mengikuti marketplace atau penjual asal.</p>
+        <h2>Tautan Affiliate</h2>
+        <p>Beberapa tautan pada website ini dapat berupa tautan affiliate. Teman Belanja bisa memperoleh komisi dari pembelian yang dilakukan melalui tautan tersebut tanpa menambah harga bagi pembeli.</p>
+        <h2>Tanggung Jawab Transaksi</h2>
+        <p>Transaksi pembelian, pembayaran, pengiriman, komplain, dan pengembalian dilakukan di platform pihak ketiga. Karena itu, ketentuan transaksi mengikuti aturan marketplace atau toko tempat pembelian dilakukan.</p>
+        <h2>Penggunaan Konten</h2>
+        <p>Pengunjung tidak diperbolehkan menyalin seluruh isi website untuk tujuan komersial tanpa izin tertulis.</p>
+        <h2>Perubahan Ketentuan</h2>
+        <p>Teman Belanja dapat memperbarui syarat dan ketentuan ini sewaktu-waktu untuk menyesuaikan layanan dan kebijakan website.</p>
+      `
+    })
+  );
+});
+
+// =========================
 // SEO ROUTES
 // =========================
 app.get("/robots.txt", (req, res) => {
@@ -926,6 +1147,11 @@ app.get("/sitemap.xml", (req, res) => {
     { loc: `${BASE_URL}/`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/produk`, lastmod: new Date().toISOString() },
     { loc: `${BASE_URL}/artikel`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/tentang-kami`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/kontak`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/kebijakan-privasi`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/kebijakan-pengembalian`, lastmod: new Date().toISOString() },
+    { loc: `${BASE_URL}/syarat-dan-ketentuan`, lastmod: new Date().toISOString() },
     ...categories.map((category) => ({
       loc: `${BASE_URL}/kategori/${category.slug}`,
       lastmod: new Date().toISOString()
