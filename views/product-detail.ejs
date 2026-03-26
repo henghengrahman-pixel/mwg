@@ -37,7 +37,6 @@
     </nav>
 
     <div class="product-detail-grid">
-      <!-- GALLERY -->
       <div class="product-gallery-card">
         <div class="product-gallery">
           <div class="main-media">
@@ -46,6 +45,7 @@
               src="<%= mediaImages[0] %>"
               alt="<%= product.name %> - <%= safeCategory %>"
               loading="lazy"
+              onclick="openLightboxFromMain()"
             />
           </div>
 
@@ -56,8 +56,13 @@
                   type="button"
                   class="thumb-btn <%= index === 0 ? 'active' : '' %>"
                   onclick='changePreview(<%- JSON.stringify(img) %>, "image", <%= index %>, this)'
+                  aria-label="Lihat gambar <%= index + 1 %> <%= product.name %>"
                 >
-                  <img src="<%= img %>" loading="lazy" />
+                  <img
+                    src="<%= img %>"
+                    alt="Gambar <%= index + 1 %> <%= product.name %>"
+                    loading="lazy"
+                  />
                 </button>
               <% }) %>
 
@@ -66,6 +71,7 @@
                   type="button"
                   class="thumb-btn video-thumb"
                   onclick='changePreview(<%- JSON.stringify(video) %>, "video", <%= index %>, this)'
+                  aria-label="Lihat video produk <%= product.name %>"
                 >
                   <span>VIDEO</span>
                 </button>
@@ -75,10 +81,8 @@
         </div>
       </div>
 
-      <!-- INFO -->
       <div class="product-info-card">
         <div class="product-info">
-
           <div class="product-top-meta">
             <a href="<%= categoryUrl %>" class="pill"><%= safeCategory %></a>
             <span class="trust-badge">Produk Pilihan</span>
@@ -87,11 +91,11 @@
           <h1 class="product-title"><%= product.name %></h1>
 
           <div class="product-meta-row">
-            <span>⭐ Rekomendasi</span>
+            <span class="meta-rating">⭐ Rekomendasi Teman Belanja</span>
             <span class="meta-divider">•</span>
-            <span>Link Aman</span>
+            <span class="meta-sales">Siap Dicek</span>
             <span class="meta-divider">•</span>
-            <span>Siap Dicek</span>
+            <span class="meta-stock">Link Aman</span>
           </div>
 
           <p class="price big"><%= safePrice %></p>
@@ -115,12 +119,12 @@
 
             <div class="quick-info-item">
               <span class="label">Pembelian</span>
-              <strong>Online / COD</strong>
+              <strong>Online / COD </strong>
             </div>
 
             <div class="quick-info-item">
               <span class="label">Status</span>
-              <strong>Ready Siap Kirim</strong>
+              <strong>READY SIAP KIRIM</strong>
             </div>
           </div>
 
@@ -131,7 +135,7 @@
           </div>
 
           <p class="cta-note">
-            Kamu bisa beli langsung lewat Shopee atau minta bantuan admin untuk checkout.
+            Cek detail, harga terbaru, varian, dan ketersediaan produk melalui tombol di bawah ini.
           </p>
 
           <div class="buy-buttons">
@@ -142,7 +146,7 @@
                 rel="nofollow sponsored"
                 href="/go/<%= product.id %>"
               >
-                🛒 Beli di Shopee
+                🛒 Beli Sekarang
               </a>
             <% } %>
 
@@ -152,7 +156,7 @@
               rel="noopener noreferrer"
               href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
             >
-              💬 Minta Bantuan Checkout
+              💬 Minta Bantu Checkout
             </a>
           </div>
 
@@ -161,12 +165,101 @@
             <p><%= safeDesc %></p>
           </div>
 
+          <% if (product.benefits && product.benefits.length) { %>
+            <div class="product-benefits info-box">
+              <h3>Kelebihan Produk</h3>
+              <ul>
+                <% product.benefits.forEach((b) => { %>
+                  <li><%= b %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+
+          <% if (product.specs && product.specs.length) { %>
+            <div class="product-specs info-box">
+              <h3>Spesifikasi</h3>
+              <ul>
+                <% product.specs.forEach((s) => { %>
+                  <li><%= s %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+
+          <div class="info-box">
+            <h3>Lihat Kategori Serupa</h3>
+            <p style="margin:0 0 14px;color:#555;line-height:1.8;">
+              Jelajahi lebih banyak produk dalam kategori <strong><%= safeCategory %></strong>
+              untuk menemukan pilihan lain yang sesuai dengan kebutuhan dan budget kamu.
+            </p>
+            <a href="<%= categoryUrl %>" class="btn ghost">Lihat Semua <%= safeCategory %></a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- MOBILE STICKY -->
+  <% if (related && related.length) { %>
+    <section class="section container related-section">
+      <div class="section-head">
+        <div>
+          <h2>Produk Serupa</h2>
+          <p class="section-subtitle">Pilihan lain yang masih satu gaya dan layak kamu cek</p>
+        </div>
+      </div>
+
+      <div class="grid-products related-products-grid">
+        <% related.forEach((item) => { %>
+          <%
+            const relatedImage =
+              ((item.images && item.images.length > 0) ? item.images[0] : item.image) ||
+              "https://via.placeholder.com/800x800?text=Teman+Belanja";
+            const relatedPrice = typeof formatRupiah === "function"
+              ? formatRupiah(item.price || 0)
+              : ("Rp " + Number(item.price || 0).toLocaleString("id-ID"));
+          %>
+
+          <article class="card product-card">
+            <a href="/produk/<%= item.slug %>" class="product-link" aria-label="Lihat produk <%= item.name %>">
+              <div class="product-thumb-wrap">
+                <img
+                  src="<%= relatedImage %>"
+                  alt="<%= item.name %>"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="product-card-body">
+                <% if (item.category) { %>
+                  <span class="mini-category"><%= item.category %></span>
+                <% } %>
+
+                <h3><%= item.name %></h3>
+
+                <div class="mini-meta">
+                  <span>⭐ Pilihan</span>
+                  <span>•</span>
+                  <span>Rekomendasi</span>
+                </div>
+
+                <% if (item.shortDesc) { %>
+                  <p class="product-short"><%= item.shortDesc %></p>
+                <% } %>
+
+                <p class="price"><%= relatedPrice %></p>
+              </div>
+            </a>
+
+            <a class="btn primary full" href="/produk/<%= item.slug %>">
+              Lihat Produk
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
   <div class="mobile-sticky-buy">
     <div class="mobile-sticky-inner">
       <div class="mobile-price-wrap">
@@ -182,7 +275,7 @@
             rel="nofollow sponsored"
             href="/go/<%= product.id %>"
           >
-            Beli Shopee
+            Beli
           </a>
         <% } %>
 
@@ -192,11 +285,189 @@
           rel="noopener noreferrer"
           href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
         >
-          Bantuan
+          Admin
         </a>
       </div>
     </div>
   </div>
+
+  <div id="imageLightbox" class="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" type="button" onclick="closeLightbox(event)">×</button>
+    <button class="lightbox-nav lightbox-prev" type="button" onclick="prevImage(event)">❮</button>
+    <button class="lightbox-nav lightbox-next" type="button" onclick="nextImage(event)">❯</button>
+
+    <div class="lightbox-toolbar" onclick="event.stopPropagation()">
+      <button type="button" class="lightbox-tool-btn" onclick="zoomOut(event)">－</button>
+      <button type="button" class="lightbox-tool-btn" onclick="resetZoom(event)">100%</button>
+      <button type="button" class="lightbox-tool-btn" onclick="zoomIn(event)">＋</button>
+    </div>
+
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <img id="lightboxImage" src="" alt="Preview Besar Produk">
+    </div>
+  </div>
+
+  <script>
+    const galleryImages = <%- JSON.stringify(mediaImages || []) %>;
+    let currentImageIndex = 0;
+    let currentScale = 1;
+
+    function clearActiveThumb() {
+      document.querySelectorAll(".thumb-btn").forEach((btn) => btn.classList.remove("active"));
+    }
+
+    function changePreview(src, type, index = 0, el = null) {
+      const container = document.querySelector(".main-media");
+      if (!container) return;
+
+      clearActiveThumb();
+      if (el) el.classList.add("active");
+
+      if (type === "video") {
+        container.innerHTML = `
+          <video controls playsinline class="main-preview-video">
+            <source src="${src}">
+            Browser tidak mendukung video
+          </video>
+        `;
+        return;
+      }
+
+      currentImageIndex = index;
+      container.innerHTML = `
+        <img
+          id="mainPreview"
+          src="${src}"
+          alt="Preview Produk"
+          onclick="openLightboxFromMain()"
+        />
+      `;
+    }
+
+    function openLightboxFromMain() {
+      const mainPreview = document.getElementById("mainPreview");
+      if (!mainPreview) return;
+
+      const currentSrc = mainPreview.getAttribute("src");
+      const foundIndex = galleryImages.findIndex((img) => img === currentSrc);
+
+      if (foundIndex >= 0) {
+        currentImageIndex = foundIndex;
+      }
+
+      openLightbox();
+    }
+
+    function openLightbox() {
+      const lightbox = document.getElementById("imageLightbox");
+      const lightboxImage = document.getElementById("lightboxImage");
+
+      if (!lightbox || !lightboxImage || !galleryImages.length) return;
+
+      lightboxImage.src = galleryImages[currentImageIndex] || galleryImages[0];
+      currentScale = 1;
+      updateZoom();
+
+      lightbox.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox(event) {
+      if (event) event.stopPropagation();
+
+      const lightbox = document.getElementById("imageLightbox");
+      if (!lightbox) return;
+
+      lightbox.classList.remove("show");
+      document.body.style.overflow = "";
+      currentScale = 1;
+    }
+
+    function updateLightboxImage() {
+      const lightboxImage = document.getElementById("lightboxImage");
+      if (!lightboxImage || !galleryImages.length) return;
+
+      lightboxImage.src = galleryImages[currentImageIndex];
+      currentScale = 1;
+      updateZoom();
+    }
+
+    function prevImage(event) {
+      if (event) event.stopPropagation();
+      if (!galleryImages.length) return;
+
+      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+      updateLightboxImage();
+    }
+
+    function nextImage(event) {
+      if (event) event.stopPropagation();
+      if (!galleryImages.length) return;
+
+      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+      updateLightboxImage();
+    }
+
+    function zoomIn(event) {
+      if (event) event.stopPropagation();
+      currentScale = Math.min(currentScale + 0.2, 3);
+      updateZoom();
+    }
+
+    function zoomOut(event) {
+      if (event) event.stopPropagation();
+      currentScale = Math.max(currentScale - 0.2, 0.6);
+      updateZoom();
+    }
+
+    function resetZoom(event) {
+      if (event) event.stopPropagation();
+      currentScale = 1;
+      updateZoom();
+    }
+
+    function updateZoom() {
+      const lightboxImage = document.getElementById("lightboxImage");
+      if (!lightboxImage) return;
+      lightboxImage.style.transform = `scale(${currentScale})`;
+    }
+
+    document.addEventListener("keydown", function (e) {
+      const lightbox = document.getElementById("imageLightbox");
+      const isOpen = lightbox && lightbox.classList.contains("show");
+
+      if (!isOpen) return;
+
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "+" || e.key === "=") zoomIn();
+      if (e.key === "-") zoomOut();
+      if (e.key === "0") resetZoom();
+    });
+  </script>
+
+  <script type="application/ld+json">
+    <%- JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      image: mediaImages,
+      description: safeDesc || safeShortDesc || product.name,
+      category: safeCategory,
+      brand: {
+        "@type": "Brand",
+        name: "Teman Belanja"
+      },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "IDR",
+        price: String(product.price || 0),
+        availability: "https://schema.org/InStock",
+        url: `${BASE_URL}/produk/${product.slug}`
+      }
+    }) %>
+  </script>
 
   <%- include("partials/footer") %>
 </body>
