@@ -20,46 +20,34 @@
     const homeCategories = Object.entries(categoryCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8);
-
-    const featuredProducts = safeProducts.filter((item) => item && item.isFeatured);
-    const heroProducts = featuredProducts.length ? featuredProducts.slice(0, 4) : safeProducts.slice(0, 4);
   %>
 
   <section class="hero">
     <div class="container hero-wrap">
       <div class="hero-content">
-        <span class="badge">Rekomendasi Produk Viral • Affiliate Shopee</span>
+        <span class="badge">Rekomendasi Produk & Tips Belanja</span>
         <h1>Teman Belanja</h1>
 
         <p class="hero-desc">
-          Temukan rekomendasi produk menarik, barang viral, fashion, kebutuhan harian,
-          dan pilihan belanja yang layak dicek. Kami merangkum produk pilihan supaya kamu
-          lebih cepat menemukan barang bagus, lalu langsung cek harga, promo, dan review di Shopee.
+          Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
+          review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
+          harian, rumah tangga, fashion, dan lainnya.
         </p>
 
         <div class="hero-actions">
-          <a class="btn primary" href="/produk">Lihat Produk Rekomendasi</a>
-          <a class="btn ghost" href="/artikel">Baca Artikel Pilihan</a>
+          <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
+          <a class="btn ghost" href="/artikel">Baca Artikel</a>
         </div>
-
-        <% if (heroProducts.length > 0) { %>
-          <div class="trust-points" style="margin-top:18px;">
-            <span>🔥 Produk pilihan harian</span>
-            <span>🛒 Langsung cek di Shopee</span>
-            <span>💬 Bisa lihat review pembeli</span>
-            <span>🎁 Cek promo & harga terbaru</span>
-          </div>
-        <% } %>
       </div>
     </div>
   </section>
 
   <% if (homeCategories.length > 0) { %>
-    <section class="section container" style="padding-top:28px;padding-bottom:8px;">
+    <section class="section container" style="padding-top:28px;padding-bottom:10px;">
       <div class="section-head" style="margin-bottom:14px;">
         <div>
           <h2>Kategori Populer</h2>
-          <p class="section-subtitle">Pilih kategori produk yang sedang banyak dicari</p>
+          <p class="section-subtitle">Pilih kategori produk yang ingin kamu lihat lebih cepat</p>
         </div>
       </div>
 
@@ -83,7 +71,7 @@
       <div class="section-head">
         <div>
           <h2>Produk Rekomendasi</h2>
-          <p class="section-subtitle">Pilihan produk yang layak dicek harga, promo, dan reviewnya</p>
+          <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
         </div>
         <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua</a>
       </div>
@@ -127,9 +115,9 @@
                 <h3><%= safeName %></h3>
 
                 <div class="mini-meta">
-                  <span>🛒 Cek Shopee</span>
+                  <span>⭐ Produk</span>
                   <span>•</span>
-                  <span>Review Pembeli</span>
+                  <span>Pilihan</span>
                   <% if (safeSuitableFor) { %>
                     <span>•</span>
                     <span><%= safeSuitableFor %></span>
@@ -147,7 +135,7 @@
             </a>
 
             <a class="btn primary full" href="/produk/<%= product.slug %>">
-              Lihat Detail
+              Lihat Produk
             </a>
           </article>
         <% }) %>
@@ -158,29 +146,29 @@
   <section class="section container">
     <div class="home-highlight-grid">
       <div class="home-highlight-card">
-        <span class="pill">Produk Pilihan</span>
-        <h3>Rekomendasi yang Sudah Dirangkum</h3>
+        <span class="pill">Belanja Lebih Mudah</span>
+        <h3>Produk Pilihan yang Sudah Dirangkum</h3>
         <p>
-          Tidak perlu capek cari satu-satu. Teman Belanja membantu merangkum produk
-          yang sedang dicari supaya kamu lebih cepat menemukan pilihan yang menarik.
+          Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu
+          menemukan produk menarik yang layak dicek lebih cepat.
         </p>
       </div>
 
       <div class="home-highlight-card">
-        <span class="pill">Cek Shopee</span>
-        <h3>Langsung Lihat Harga, Promo, dan Review</h3>
+        <span class="pill">Link Produk</span>
+        <h3>Langsung Cek Harga & Detail</h3>
         <p>
-          Setiap produk bisa langsung kamu cek ke marketplace untuk melihat harga terbaru,
-          varian, stok, diskon, dan ulasan pembeli sebelum memutuskan beli.
+          Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa
+          langsung melihat harga terbaru, varian, dan stok produk.
         </p>
       </div>
 
       <div class="home-highlight-card">
-        <span class="pill">SEO & Artikel</span>
-        <h3>Tips Belanja Ringkas dan Mudah Dipahami</h3>
+        <span class="pill">Tips Belanja</span>
+        <h3>Artikel Ringkas dan Mudah Dipahami</h3>
         <p>
-          Selain produk, kamu juga bisa baca artikel rekomendasi dan tips belanja
-          supaya lebih gampang memilih barang yang cocok dengan kebutuhan.
+          Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih
+          mudah menentukan pilihan yang cocok dengan kebutuhanmu.
         </p>
       </div>
     </div>
@@ -191,7 +179,7 @@
       <div class="section-head">
         <div>
           <h2>Artikel Terbaru</h2>
-          <p class="section-subtitle">Baca rekomendasi produk, tips belanja, dan inspirasi pilihan terbaik</p>
+          <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
         </div>
         <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua</a>
       </div>
@@ -221,25 +209,21 @@
     </section>
   <% } %>
 
-  <% if (safeProducts.length > 0) { %>
-    <section class="section container">
-      <div class="site-info">
-        <h2>Kenapa cek produk lewat Teman Belanja?</h2>
-        <p>
-          Teman Belanja membantu kamu menemukan produk yang sedang ramai, menarik,
-          dan layak dipertimbangkan tanpa harus muter-muter cari sendiri.
-        </p>
-        <p>
-          Kami merangkum rekomendasi produk dan artikel yang relevan, lalu mengarahkan kamu
-          untuk cek detail lengkap di Shopee seperti harga terbaru, variasi, stok, dan review pembeli.
-        </p>
-        <p>
-          Jadi alurnya lebih simpel: temukan produk di Teman Belanja, lihat ringkasannya,
-          lalu lanjut cek marketplace untuk keputusan belanja yang lebih aman dan nyaman.
-        </p>
-      </div>
-    </section>
-  <% } %>
+  <section class="section container">
+    <div class="site-info">
+      <h2>Tentang Teman Belanja</h2>
+      <p>
+        Teman Belanja membantu kamu menemukan berbagai barang menarik
+        yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
+        pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
+      </p>
+      <p>
+        Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
+        pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
+        dengan lebih mudah.
+      </p>
+    </div>
+  </section>
 
   <%- include("partials/footer") %>
 </body>
