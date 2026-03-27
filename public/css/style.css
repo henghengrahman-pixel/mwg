@@ -1948,3 +1948,100 @@ RESPONSIVE
     font-size:13px;
   }
 }
+/* =========================
+AFFILIATE CTA / CONVERSION
+========================= */
+
+.affiliate-highlight{
+  background:linear-gradient(135deg,#fff4ee,#fff);
+  border:2px solid #ffe2d4;
+  border-radius:20px;
+  padding:18px;
+  margin-top:18px;
+}
+
+.affiliate-highlight h2{
+  margin:6px 0 8px;
+  font-size:20px;
+  color:#ff5a00;
+}
+
+.affiliate-highlight p{
+  margin:0;
+  color:#555;
+  line-height:1.7;
+}
+
+/* CTA ulang di tengah halaman */
+.cta-repeat-box{
+  margin-top:26px;
+  padding:22px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#ff5a00,#ff7a00);
+  color:#fff;
+  text-align:center;
+}
+
+.cta-repeat-box h3{
+  margin:0 0 8px;
+  font-size:22px;
+}
+
+.cta-repeat-box p{
+  margin:0 0 14px;
+  opacity:.95;
+}
+
+.cta-repeat-box .btn-buy-main{
+  background:#fff;
+  color:#ff5a00;
+  box-shadow:none;
+}
+
+.cta-repeat-box .btn-buy-main:hover{
+  background:#fff3eb;
+}
+
+/* Trust box */
+.info-box{
+  background:#fafafa;
+  border-radius:18px;
+  padding:18px;
+  border:1px solid #eee;
+}
+
+/* Harga section */
+.price-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:12px 0 6px;
+}
+
+.price-label{
+  font-size:13px;
+  color:#777;
+}
+
+.price-main{
+  font-size:30px;
+  font-weight:800;
+  color:#ff5a00;
+  margin:0;
+}
+
+.price-note{
+  font-size:12px;
+  color:#888;
+}
+
+/* Tombol Shopee lebih besar */
+.btn-buy-main{
+  font-size:17px;
+  min-height:60px;
+}
+
+/* Mobile sticky Shopee lebih mencolok */
+.mobile-buy-btn.primary{
+  background:linear-gradient(135deg,#ff6a00,#ff2e00);
+}
