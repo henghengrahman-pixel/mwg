@@ -129,34 +129,17 @@
           "@type": "ImageObject",
           "url": normalizedBaseUrl ? `${normalizedBaseUrl}/img/logo.png` : "/img/logo.png"
         }
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": `${normalizedBaseUrl}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
       }
     }) %>
   </script>
 
-  <!-- Organization Schema -->
-  <script type="application/ld+json">
-    <%- JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "@id": `${normalizedBaseUrl || currentUrl}#organization`,
-      "name": siteName,
-      "url": normalizedBaseUrl || currentUrl,
-      "logo": normalizedBaseUrl ? `${normalizedBaseUrl}/img/logo.png` : "/img/logo.png",
-      "sameAs": [
-        "https://www.facebook.com/",
-        "https://www.pinterest.com/"
-      ]
-    }) %>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ESTMYY5ED9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ESTMYY5ED9');
   </script>
 
-  <% if (typeof structuredData !== "undefined" && Array.isArray(structuredData) && structuredData.length) { %>
-    <% structuredData.forEach(function(item){ %>
-      <script type="application/ld+json"><%- JSON.stringify(item) %></script>
-    <% }) %>
-  <% } %>
 </head>
