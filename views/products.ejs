@@ -6,269 +6,97 @@
   <%- include("partials/header") %>
 
   <%
-    const safeName = product?.name || "Produk Pilihan";
-    const safeCategory = product?.category || "Rekomendasi";
-    const safeCategorySlug = product?.categorySlug || "";
-    const categoryUrl = safeCategorySlug ? `/kategori/${safeCategorySlug}` : "/produk";
-
-    const mediaImages = Array.isArray(product?.images) && product.images.length
-      ? product.images
-      : [product?.image || "https://via.placeholder.com/900x900?text=Teman+Belanja"];
-
-    const heroImage = mediaImages[0] || "https://via.placeholder.com/900x900?text=Teman+Belanja";
-
-    const safeShortDesc = product?.shortDesc || "";
-    const safeDesc = product?.desc || safeShortDesc || "Lihat detail lengkap, harga terbaru, varian, dan ketersediaan produk melalui marketplace.";
-    const safePrice = typeof formatRupiah === "function"
-      ? formatRupiah(product?.price || 0)
-      : ("Rp " + Number(product?.price || 0).toLocaleString("id-ID"));
-
-    const hasAffiliate = Boolean(product?.affiliateUrl || product?.sourceUrl);
-    const hasAdmin = true;
-    const trustPoints = [
-      "Cek harga terbaru di Shopee",
-      "Lihat varian & stok langsung",
-      "Bisa baca review pembeli",
-      "Link marketplace lebih aman"
-    ];
-
-    const reasonList = Array.isArray(product?.benefits) && product.benefits.length
-      ? product.benefits
-      : [
-          "Praktis untuk dicek langsung di marketplace",
-          "Harga, promo, dan stok bisa berubah sewaktu-waktu",
-          "Review pembeli membantu sebelum beli"
-        ];
-
-    const specList = Array.isArray(product?.specs) && product.specs.length
-      ? product.specs
-      : [];
+    const safeProducts = Array.isArray(products) ? products : [];
+    const currentCategory = typeof selectedCategory !== "undefined" ? selectedCategory : "";
+    const currentQuery = typeof searchQuery !== "undefined" ? searchQuery : "";
   %>
 
-  <section class="section container product-detail-page">
+  <section class="section container" style="padding-top:32px;">
     <div class="breadcrumb" style="margin-bottom:16px;">
       <a href="/">Beranda</a>
       <span>/</span>
-      <a href="/produk">Produk</a>
-      <span>/</span>
-      <% if (safeCategorySlug) { %>
-        <a href="<%= categoryUrl %>"><%= safeCategory %></a>
-        <span>/</span>
-      <% } %>
-      <span><%= safeName %></span>
+      <span>Produk</span>
     </div>
 
-    <div class="product-detail-layout">
-      <div class="product-gallery card">
-        <div class="product-main-media" onclick="openLightbox(0)">
-          <img
-            id="mainProductImage"
-            src="<%= heroImage %>"
-            alt="<%= safeName %>"
-            loading="eager"
-          />
-        </div>
-
-        <% if (mediaImages.length > 1) { %>
-          <div class="product-thumbs">
-            <% mediaImages.forEach((img, index) => { %>
-              <button
-                type="button"
-                class="thumb-btn <%= index === 0 ? 'active' : '' %>"
-                onclick="setMainImage('<%= img %>', <%= index %>)"
-                aria-label="Lihat gambar <%= index + 1 %> dari <%= safeName %>"
-              >
-                <img src="<%= img %>" alt="<%= safeName %> <%= index + 1 %>" loading="lazy" />
-              </button>
-            <% }) %>
-          </div>
-        <% } %>
+    <div class="section-head" style="align-items:flex-end;gap:16px;flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0 0 8px;">Semua Produk</h1>
+        <p class="section-subtitle" style="margin:0;">
+          Temukan rekomendasi produk pilihan, produk viral, dan barang yang layak kamu cek.
+        </p>
       </div>
 
-      <div class="product-summary card">
-        <div class="product-summary-head">
-          <span class="mini-category"><%= safeCategory %></span>
-          <% if (product?.isFeatured) { %>
-            <span class="pill" style="background:#fff1e8;color:#ff5a00;">Unggulan</span>
-          <% } %>
-        </div>
+      <form method="GET" action="/produk" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input
+          type="text"
+          name="q"
+          value="<%= currentQuery %>"
+          placeholder="Cari produk..."
+          style="padding:12px 14px;border:1px solid #ddd;border-radius:12px;min-width:220px;"
+        />
 
-        <h1 class="product-title"><%= safeName %></h1>
-
-        <% if (safeShortDesc) { %>
-          <p class="product-short-lead"><%= safeShortDesc %></p>
+        <% if (currentCategory) { %>
+          <input type="hidden" name="kategori" value="<%= currentCategory %>">
         <% } %>
 
-        <div class="price-row">
-          <div>
-            <span class="price-label">Estimasi harga</span>
-            <p class="price-main"><%= safePrice %></p>
-          </div>
-          <div class="price-note">
-            <span>Harga dapat berubah mengikuti marketplace</span>
-          </div>
-        </div>
-
-        <div class="trust-points">
-          <% trustPoints.forEach((point) => { %>
-            <span><%= point %></span>
-          <% }) %>
-        </div>
-
-        <div class="affiliate-highlight">
-          <span class="pill">Rekomendasi Teman Belanja</span>
-          <h2>Cek detail lengkap di marketplace</h2>
-          <p>
-            Untuk melihat harga terbaru, promo, varian, stok, dan review pembeli,
-            lanjut cek produk ini melalui Shopee lewat tombol di bawah.
-          </p>
-        </div>
-
-        <div class="buy-buttons">
-          <% if (hasAffiliate) { %>
-            <a
-              class="btn-buy-main"
-              target="_blank"
-              rel="nofollow sponsored"
-              href="/go/<%= product.id %>"
-            >
-              🛒 Cek Harga & Beli di Shopee
-            </a>
-          <% } %>
-
-          <% if (hasAdmin) { %>
-            <a
-              class="btn-buy-admin"
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20cek%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
-            >
-              💬 Tanya Admin
-            </a>
-          <% } %>
-        </div>
-
-        <div class="quick-info-grid">
-          <div class="quick-info-item">
-            <strong>Kategori</strong>
-            <span><%= safeCategory %></span>
-          </div>
-
-          <div class="quick-info-item">
-            <strong>Tipe</strong>
-            <span>Produk affiliate</span>
-          </div>
-
-          <div class="quick-info-item">
-            <strong>Belanja</strong>
-            <span>Lewat marketplace</span>
-          </div>
-
-          <div class="quick-info-item">
-            <strong>Review</strong>
-            <span>Cek langsung di Shopee</span>
-          </div>
-        </div>
-
-        <div class="product-description">
-          <h2>Ringkasan Produk</h2>
-          <p><%= safeDesc %></p>
-        </div>
-
-        <div class="info-box">
-          <h3>Kenapa layak dicek?</h3>
-          <ul>
-            <% reasonList.forEach((item) => { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-
-        <% if (specList.length) { %>
-          <div class="product-specs info-box">
-            <h3>Spesifikasi</h3>
-            <ul>
-              <% specList.forEach((s) => { %>
-                <li><%= s %></li>
-              <% }) %>
-            </ul>
-          </div>
-        <% } %>
-
-        <div class="info-box affiliate-box">
-          <h3>Catatan penting</h3>
-          <ul>
-            <li>Harga, stok, dan varian dapat berubah sewaktu-waktu.</li>
-            <li>Pembelian dilakukan melalui marketplace yang ditautkan.</li>
-            <li>Pastikan cek rating toko dan review pembeli sebelum checkout.</li>
-          </ul>
-        </div>
-
-        <% if (hasAffiliate) { %>
-          <div class="cta-repeat-box">
-            <h3>Mau lanjut lihat detail lengkapnya?</h3>
-            <p>
-              Klik tombol di bawah untuk cek harga terbaru, pilihan varian, promo, dan review pembeli langsung di Shopee.
-            </p>
-            <a
-              class="btn-buy-main second-cta"
-              target="_blank"
-              rel="nofollow sponsored"
-              href="/go/<%= product.id %>"
-            >
-              🔥 Lihat Detail di Shopee
-            </a>
-          </div>
-        <% } %>
-
-        <div class="info-box">
-          <h3>Lihat Kategori Serupa</h3>
-          <p style="margin:0 0 14px;color:#555;line-height:1.8;">
-            Jelajahi lebih banyak produk dalam kategori <strong><%= safeCategory %></strong>
-            untuk menemukan pilihan lain yang sesuai dengan kebutuhan dan budget kamu.
-          </p>
-          <a href="<%= categoryUrl %>" class="btn ghost">Lihat Semua <%= safeCategory %></a>
-        </div>
-      </div>
+        <button
+          type="submit"
+          class="btn primary"
+          style="border:none;cursor:pointer;"
+        >
+          Cari
+        </button>
+      </form>
     </div>
   </section>
 
-  <% if (related && related.length) { %>
-    <section class="section container related-section">
-      <div class="section-head">
-        <div>
-          <h2>Produk Serupa</h2>
-          <p class="section-subtitle">Pilihan lain yang masih satu gaya dan layak kamu cek</p>
-        </div>
+  <section class="section container" style="padding-top:0;">
+    <% if (safeProducts.length === 0) { %>
+      <div class="card" style="padding:28px;text-align:center;">
+        <h2 style="margin-top:0;">Produk belum tersedia</h2>
+        <p style="color:#666;line-height:1.8;margin-bottom:18px;">
+          Saat ini belum ada produk yang cocok dengan filter atau pencarian kamu.
+        </p>
+        <a href="/produk" class="btn primary">Lihat Semua Produk</a>
       </div>
-
-      <div class="grid-products related-products-grid">
-        <% related.forEach((item) => { %>
+    <% } else { %>
+      <div class="grid-products">
+        <% safeProducts.forEach((product) => { %>
           <%
-            const relatedImage =
-              ((item.images && item.images.length > 0) ? item.images[0] : item.image) ||
+            const coverImage =
+              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
               "https://via.placeholder.com/800x800?text=Teman+Belanja";
-            const relatedPrice = typeof formatRupiah === "function"
-              ? formatRupiah(item.price || 0)
-              : ("Rp " + Number(item.price || 0).toLocaleString("id-ID"));
+
+            const safeName = product?.name || "Produk Pilihan";
+            const safeCategory = product?.category || "Rekomendasi";
+            const safeShortDesc = product?.shortDesc || "Lihat detail lengkap produk ini.";
+            const safePrice = typeof formatRupiah === "function"
+              ? formatRupiah(product?.price || 0)
+              : ("Rp " + Number(product?.price || 0).toLocaleString("id-ID"));
           %>
 
           <article class="card product-card">
-            <a href="/produk/<%= item.slug %>" class="product-link" aria-label="Lihat produk <%= item.name %>">
-              <div class="product-thumb-wrap">
+            <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+              <div class="product-thumb-wrap" style="position:relative;">
                 <img
-                  src="<%= relatedImage %>"
-                  alt="<%= item.name %>"
+                  src="<%= coverImage %>"
+                  alt="<%= safeName %>"
                   loading="lazy"
                 />
+
+                <% if (product?.isFeatured) { %>
+                  <span
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                  >
+                    Unggulan
+                  </span>
+                <% } %>
               </div>
 
               <div class="product-card-body">
-                <% if (item.category) { %>
-                  <span class="mini-category"><%= item.category %></span>
-                <% } %>
+                <span class="mini-category"><%= safeCategory %></span>
 
-                <h3><%= item.name %></h3>
+                <h3><%= safeName %></h3>
 
                 <div class="mini-meta">
                   <span>⭐ Pilihan</span>
@@ -276,166 +104,22 @@
                   <span>Rekomendasi</span>
                 </div>
 
-                <% if (item.shortDesc) { %>
-                  <p class="product-short"><%= item.shortDesc %></p>
-                <% } %>
+                <p class="product-short"><%= safeShortDesc %></p>
 
-                <p class="price"><%= relatedPrice %></p>
+                <% if (product?.price) { %>
+                  <p class="price"><%= safePrice %></p>
+                <% } %>
               </div>
             </a>
 
-            <a class="btn primary full" href="/produk/<%= item.slug %>">
+            <a class="btn primary full" href="/produk/<%= product.slug %>">
               Lihat Produk
             </a>
           </article>
         <% }) %>
       </div>
-    </section>
-  <% } %>
-
-  <div class="mobile-sticky-buy">
-    <div class="mobile-sticky-inner">
-      <div class="mobile-price-wrap">
-        <span class="mobile-price-label">Cek harga</span>
-        <strong><%= safePrice %></strong>
-      </div>
-
-      <div class="mobile-buy-actions">
-        <% if (hasAffiliate) { %>
-          <a
-            class="mobile-buy-btn primary"
-            target="_blank"
-            rel="nofollow sponsored"
-            href="/go/<%= product.id %>"
-          >
-            Shopee
-          </a>
-        <% } %>
-
-        <% if (hasAdmin) { %>
-          <a
-            class="mobile-buy-btn secondary"
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20cek%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
-          >
-            Admin
-          </a>
-        <% } %>
-      </div>
-    </div>
-  </div>
-
-  <div id="imageLightbox" class="lightbox" onclick="closeLightbox(event)">
-    <button class="lightbox-close" type="button" onclick="closeLightbox(event)">×</button>
-    <button class="lightbox-nav lightbox-prev" type="button" onclick="prevImage(event)">❮</button>
-    <button class="lightbox-nav lightbox-next" type="button" onclick="nextImage(event)">❯</button>
-
-    <div class="lightbox-toolbar" onclick="event.stopPropagation()">
-      <button type="button" class="lightbox-tool-btn" onclick="zoomOut(event)">－</button>
-      <button type="button" class="lightbox-tool-btn" onclick="resetZoom(event)">100%</button>
-      <button type="button" class="lightbox-tool-btn" onclick="zoomIn(event)">＋</button>
-    </div>
-
-    <div class="lightbox-content" onclick="event.stopPropagation()">
-      <img id="lightboxImage" src="" alt="Preview Besar Produk">
-    </div>
-  </div>
-
-  <script>
-    const galleryImages = <%- JSON.stringify(mediaImages || []) %>;
-    let currentImageIndex = 0;
-    let currentScale = 1;
-
-    function setMainImage(src, index) {
-      const mainImage = document.getElementById("mainProductImage");
-      if (mainImage) {
-        mainImage.src = src;
-      }
-
-      currentImageIndex = index;
-
-      document.querySelectorAll(".thumb-btn").forEach((btn, idx) => {
-        btn.classList.toggle("active", idx === index);
-      });
-    }
-
-    function openLightbox(index = 0) {
-      currentImageIndex = index;
-      currentScale = 1;
-
-      const lightbox = document.getElementById("imageLightbox");
-      const lightboxImage = document.getElementById("lightboxImage");
-
-      if (!lightbox || !lightboxImage || !galleryImages.length) return;
-
-      lightbox.style.display = "flex";
-      lightboxImage.src = galleryImages[currentImageIndex];
-      lightboxImage.style.transform = "scale(1)";
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeLightbox(event) {
-      if (event) event.stopPropagation();
-
-      const lightbox = document.getElementById("imageLightbox");
-      if (!lightbox) return;
-
-      lightbox.style.display = "none";
-      document.body.style.overflow = "";
-    }
-
-    function updateLightboxImage() {
-      const lightboxImage = document.getElementById("lightboxImage");
-      if (!lightboxImage || !galleryImages.length) return;
-
-      lightboxImage.src = galleryImages[currentImageIndex];
-      lightboxImage.style.transform = `scale(${currentScale})`;
-    }
-
-    function prevImage(event) {
-      event.stopPropagation();
-      if (!galleryImages.length) return;
-      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-      currentScale = 1;
-      updateLightboxImage();
-    }
-
-    function nextImage(event) {
-      event.stopPropagation();
-      if (!galleryImages.length) return;
-      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-      currentScale = 1;
-      updateLightboxImage();
-    }
-
-    function zoomIn(event) {
-      event.stopPropagation();
-      currentScale = Math.min(currentScale + 0.2, 3);
-      updateLightboxImage();
-    }
-
-    function zoomOut(event) {
-      event.stopPropagation();
-      currentScale = Math.max(currentScale - 0.2, 1);
-      updateLightboxImage();
-    }
-
-    function resetZoom(event) {
-      event.stopPropagation();
-      currentScale = 1;
-      updateLightboxImage();
-    }
-
-    document.addEventListener("keydown", function (e) {
-      const lightbox = document.getElementById("imageLightbox");
-      if (!lightbox || lightbox.style.display !== "flex") return;
-
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowLeft") prevImage(e);
-      if (e.key === "ArrowRight") nextImage(e);
-    });
-  </script>
+    <% } %>
+  </section>
 
   <%- include("partials/footer") %>
 </body>
