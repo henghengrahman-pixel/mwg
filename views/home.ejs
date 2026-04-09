@@ -8,127 +8,221 @@
   <%
     const safeProducts = Array.isArray(products) ? products : [];
     const safeArticles = Array.isArray(articles) ? articles : [];
+
+    const categoryCounts = {};
+    safeProducts.forEach((item) => {
+      if (item && item.category) {
+        const key = String(item.category).trim();
+        if (key) categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+      }
+    });
+
+    const homeCategories = Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8);
   %>
 
-  <!-- HERO PREMIUM -->
-  <section class="hero-premium">
-    <div class="container hero-grid">
-      <div class="hero-text">
-        <span class="badge">🔥 PRODUK VIRAL & TERLARIS</span>
-        <h1>TEMUKAN PRODUK TERBAIK TANPA RIBET</h1>
+  <section class="hero">
+    <div class="container hero-wrap">
+      <div class="hero-content">
+        <span class="badge">Rekomendasi Produk & Tips Belanja</span>
+        <h1>Teman Belanja</h1>
 
-        <p>
-          Kami sudah pilihkan produk paling laris, paling dicari, dan paling worth it.
-          Kamu tinggal lihat, pilih, dan langsung cek detailnya.
+        <p class="hero-desc">
+          Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
+          review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
+          harian, rumah tangga, fashion, dan lainnya.
         </p>
 
-        <div class="hero-cta">
-          <a href="/produk" class="btn primary">Lihat Produk 🔥</a>
-          <a href="/artikel" class="btn ghost">Tips & Artikel</a>
-        </div>
-
-        <div class="hero-proof">
-          <span>✔ Produk pilihan</span>
-          <span>✔ Banyak dicari</span>
-          <span>✔ Update setiap hari</span>
+        <div class="hero-actions">
+          <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
+          <a class="btn ghost" href="/artikel">Baca Artikel</a>
         </div>
       </div>
-
-      <div class="hero-image">
-        <img src="https://via.placeholder.com/500x500?text=Best+Product" alt="Produk Terbaik" />
-      </div>
     </div>
   </section>
 
-  <!-- KEUNGGULAN -->
-  <section class="section container">
-    <div class="grid-3">
-      <div class="card">
-        <h3>🔥 Produk Terlaris</h3>
-        <p>Semua produk sudah dipilih berdasarkan tren dan minat pasar.</p>
+  <% if (homeCategories.length > 0) { %>
+    <section class="section container" style="padding-top:28px;padding-bottom:10px;">
+      <div class="section-head" style="margin-bottom:14px;">
+        <div>
+          <h2>Kategori Populer</h2>
+          <p class="section-subtitle">Pilih kategori produk yang ingin kamu lihat lebih cepat</p>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>⚡ Hemat Waktu</h3>
-        <p>Tidak perlu scroll panjang — semua sudah kami rangkum.</p>
-      </div>
-
-      <div class="card">
-        <h3>💯 Worth It</h3>
-        <p>Produk yang direkomendasikan punya value terbaik.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRODUK -->
-  <section class="section container">
-    <div class="section-head">
-      <h2>🔥 PRODUK TERLARIS & PALING DICARI</h2>
-    </div>
-
-    <div class="grid-products">
-      <% safeProducts.slice(0, 8).forEach((product) => { %>
-        <article class="card product-card premium">
-          <a href="/produk/<%= product.slug %>">
-            <div class="product-img">
-              <img src="<%= product.image || 'https://via.placeholder.com/300' %>" />
-              <span class="badge-sale">Best Seller</span>
-            </div>
-
-            <div class="product-info">
-              <h3><%= product.name %></h3>
-              <p><%= product.shortDesc || 'Produk pilihan terbaik' %></p>
-
-              <% if (product.price) { %>
-                <div class="price"><%= formatRupiah(product.price) %></div>
-              <% } %>
-            </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <% homeCategories.forEach(([categoryName, total]) => { %>
+          <a
+            href="/produk?kategori=<%= encodeURIComponent(categoryName) %>"
+            class="pill"
+            style="text-decoration:none;"
+            aria-label="Lihat produk kategori <%= categoryName %>"
+          >
+            <%= categoryName %> (<%= total %>)
           </a>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
 
-          <a href="/produk/<%= product.slug %>" class="btn primary full">
-            Cek Detail & Harga
-          </a>
-        </article>
-      <% }) %>
-    </div>
-  </section>
+  <% if (safeProducts.length > 0) { %>
+    <section class="section container">
+      <div class="section-head">
+        <div>
+          <h2>Produk Rekomendasi</h2>
+          <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
+        </div>
+        <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua</a>
+      </div>
 
-  <!-- ARTIKEL -->
+      <div class="grid-products">
+        <% safeProducts.slice(0, 8).forEach((product) => { %>
+          <%
+            const coverImage =
+              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
+              "https://via.placeholder.com/800x800?text=Teman+Belanja";
+
+            const safeName = product.name || "Produk Pilihan";
+            const safeCategory = product.category || "";
+            const safeShortDesc = product.shortDesc || "";
+            const safeSuitableFor = product.suitableFor || "";
+          %>
+
+          <article class="card product-card">
+            <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+              <div class="product-thumb-wrap" style="position:relative;">
+                <img
+                  src="<%= coverImage %>"
+                  alt="<%= safeName %>"
+                  loading="lazy"
+                />
+
+                <% if (product.isFeatured) { %>
+                  <span
+                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
+                  >
+                    Unggulan
+                  </span>
+                <% } %>
+              </div>
+
+              <div class="product-card-body">
+                <% if (safeCategory) { %>
+                  <span class="mini-category"><%= safeCategory %></span>
+                <% } %>
+
+                <h3><%= safeName %></h3>
+
+                <div class="mini-meta">
+                  <span>⭐ Produk</span>
+                  <span>•</span>
+                  <span>Pilihan</span>
+                  <% if (safeSuitableFor) { %>
+                    <span>•</span>
+                    <span><%= safeSuitableFor %></span>
+                  <% } %>
+                </div>
+
+                <% if (safeShortDesc) { %>
+                  <p class="product-short"><%= safeShortDesc %></p>
+                <% } %>
+
+                <% if (product.price) { %>
+                  <p class="price"><%= formatRupiah(product.price) %></p>
+                <% } %>
+              </div>
+            </a>
+
+            <a class="btn primary full" href="/produk/<%= product.slug %>">
+              Lihat Produk
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
   <section class="section container">
-    <div class="section-head">
-      <h2>📖 TIPS & ARTIKEL TERBARU</h2>
-    </div>
+    <div class="home-highlight-grid">
+      <div class="home-highlight-card">
+        <span class="pill">Belanja Lebih Mudah</span>
+        <h3>Produk Pilihan yang Sudah Dirangkum</h3>
+        <p>
+          Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu
+          menemukan produk menarik yang layak dicek lebih cepat.
+        </p>
+      </div>
 
-    <div class="grid-articles">
-      <% safeArticles.slice(0, 4).forEach((article) => { %>
-        <article class="card">
-          <a href="/artikel/<%= article.slug %>">
-            <img src="<%= article.cover || 'https://via.placeholder.com/400x200' %>" />
-            <h3><%= article.title %></h3>
-          </a>
-          <p><%= article.excerpt || '' %></p>
-        </article>
-      <% }) %>
+      <div class="home-highlight-card">
+        <span class="pill">Link Produk</span>
+        <h3>Langsung Cek Harga & Detail</h3>
+        <p>
+          Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa
+          langsung melihat harga terbaru, varian, dan stok produk.
+        </p>
+      </div>
+
+      <div class="home-highlight-card">
+        <span class="pill">Tips Belanja</span>
+        <h3>Artikel Ringkas dan Mudah Dipahami</h3>
+        <p>
+          Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih
+          mudah menentukan pilihan yang cocok dengan kebutuhanmu.
+        </p>
+      </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="cta">
-    <div class="container">
-      <h2>Jangan Sampai Ketinggalan Produk Bagus 🔥</h2>
-      <p>Cek sekarang sebelum kehabisan atau harga naik</p>
-      <a href="/produk" class="btn primary">Lihat Semua Produk</a>
-    </div>
-  </section>
+  <% if (safeArticles.length > 0) { %>
+    <section class="section container">
+      <div class="section-head">
+        <div>
+          <h2>Artikel Terbaru</h2>
+          <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
+        </div>
+        <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua</a>
+      </div>
 
-  <!-- SEO TEXT -->
+      <div class="grid-articles">
+        <% safeArticles.slice(0, 6).forEach((article) => { %>
+          <article class="card article-card">
+            <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= article.title %>">
+              <img
+                src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
+                alt="<%= article.title %>"
+                loading="lazy"
+              />
+              <h3><%= article.title %></h3>
+            </a>
+
+            <% if (article.excerpt) { %>
+              <p><%= article.excerpt %></p>
+            <% } %>
+
+            <a class="btn ghost full" href="/artikel/<%= article.slug %>">
+              Baca Artikel
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
   <section class="section container">
-    <h2>Tentang Teman Belanja</h2>
-    <p>
-      Teman Belanja adalah platform rekomendasi produk terbaik yang membantu kamu menemukan
-      barang berkualitas tanpa harus membuang waktu mencari satu per satu.
-      Semua produk dipilih berdasarkan tren, kualitas, dan minat pasar.
-    </p>
+    <div class="site-info">
+      <h2>Tentang Teman Belanja</h2>
+      <p>
+        Teman Belanja membantu kamu menemukan berbagai barang menarik
+        yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
+        pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
+      </p>
+      <p>
+        Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
+        pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
+        dengan lebih mudah.
+      </p>
+    </div>
   </section>
 
   <%- include("partials/footer") %>
