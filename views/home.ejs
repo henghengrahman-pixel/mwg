@@ -2,6 +2,764 @@
 <html lang="id">
 <%- include("partials/head") %>
 
+<style>
+  /* =============================================
+     TEMAN BELANJA — WARM EDITORIAL REDESIGN
+     ============================================= */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --cream:       #FAF6F0;
+    --cream-dark:  #F0E8DC;
+    --ink:         #1C1008;
+    --ink-soft:    #5C4A38;
+    --orange:      #F25C1E;
+    --orange-soft: #FFF0E8;
+    --gold:        #C9892A;
+    --white:       #FFFFFF;
+    --card-bg:     #FFFFFF;
+    --border:      #E8DECE;
+    --radius-sm:   8px;
+    --radius-md:   16px;
+    --radius-lg:   24px;
+    --shadow-sm:   0 2px 12px rgba(28,16,8,.07);
+    --shadow-md:   0 8px 32px rgba(28,16,8,.11);
+    --shadow-lg:   0 20px 60px rgba(28,16,8,.14);
+    --trans:       all .3s cubic-bezier(.25,.8,.25,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── REVEAL ANIMATION ─────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .65s ease, transform .65s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── HERO ─────────────────────────────────── */
+  .hero {
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 75% 50%, rgba(242,92,30,.22) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 80% at 10% 100%, rgba(201,137,42,.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: .6;
+    pointer-events: none;
+  }
+
+  /* decorative big text */
+  .hero-deco-text {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(120px, 18vw, 260px);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .hero-wrap {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+
+  .hero-content { max-width: 560px; }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(242,92,30,.15);
+    border: 1px solid rgba(242,92,30,.3);
+    color: #FF8A5C;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border-radius: 999px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:.5; transform:scale(1.4); }
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 6.5vw, 88px);
+    font-weight: 900;
+    line-height: 1.0;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    line-height: 1.75;
+    color: rgba(255,255,255,.65);
+    margin-bottom: 40px;
+    max-width: 460px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ── BUTTONS ──────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--trans);
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .btn.primary {
+    background: var(--orange);
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(242,92,30,.4);
+  }
+  .btn.primary:hover {
+    background: #d94c10;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(242,92,30,.5);
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--white);
+    border-color: rgba(255,255,255,.3);
+  }
+  .btn.ghost:hover {
+    border-color: var(--white);
+    background: rgba(255,255,255,.08);
+    transform: translateY(-2px);
+  }
+  .btn.ghost-dark {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border);
+  }
+  .btn.ghost-dark:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+    transform: translateY(-2px);
+  }
+  .btn.full { width: 100%; justify-content: center; }
+
+  /* hero stats */
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-end;
+  }
+
+  .hero-stat-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius-md);
+    padding: 24px 32px;
+    color: var(--white);
+    text-align: right;
+    min-width: 200px;
+  }
+
+  .hero-stat-card .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hero-stat-card .num span { color: var(--orange); }
+
+  .hero-stat-card .lbl {
+    font-size: 12px;
+    color: rgba(255,255,255,.5);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  .hero-float-badge {
+    background: var(--orange);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    display: inline-block;
+    box-shadow: 0 8px 24px rgba(242,92,30,.4);
+    text-align: right;
+    min-width: 200px;
+  }
+
+  /* ── SECTION SHELL ────────────────────────── */
+  .section { padding: 80px 0; }
+  .section-sm { padding: 48px 0; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 2px;
+    background: var(--orange);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+
+  .section-subtitle {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    gap: 20px;
+  }
+
+  /* ── PILL / TAG ───────────────────────────── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--cream-dark);
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    transition: var(--trans);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .pill:hover {
+    background: var(--orange-soft);
+    border-color: var(--orange);
+    color: var(--orange);
+    transform: translateY(-2px);
+  }
+
+  /* ── CATEGORIES STRIP ─────────────────────── */
+  .cats-section {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 0;
+  }
+
+  .cats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .cats-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--cream);
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    text-decoration: none;
+    transition: var(--trans);
+  }
+  .cat-pill:hover {
+    background: var(--ink);
+    color: var(--white);
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  .cat-pill .cat-count {
+    background: var(--orange-soft);
+    color: var(--orange);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .cat-pill:hover .cat-count {
+    background: rgba(255,255,255,.15);
+    color: var(--white);
+  }
+
+  /* ── PRODUCT GRID ─────────────────────────── */
+  .grid-products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  .product-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--trans);
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+  }
+
+  .product-link { text-decoration: none; color: inherit; display: flex; flex-direction: column; flex: 1; }
+
+  .product-thumb-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--cream-dark);
+  }
+  .product-thumb-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .product-card:hover .product-thumb-wrap img {
+    transform: scale(1.07);
+  }
+
+  .badge-featured {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: var(--orange);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(242,92,30,.4);
+    z-index: 2;
+  }
+
+  .product-card-body {
+    padding: 18px 20px 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mini-category {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--orange);
+  }
+
+  .product-card-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  .mini-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .mini-meta .dot { color: var(--border); }
+
+  .product-short {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .price {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--orange);
+    margin-top: 4px;
+  }
+
+  .card-footer {
+    padding: 0 20px 20px;
+  }
+
+  /* ── HIGHLIGHT CARDS ──────────────────────── */
+  .highlight-section {
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .highlight-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(242,92,30,.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .highlight-card {
+    padding: 52px 40px;
+    border-right: 1px solid rgba(255,255,255,.07);
+    transition: var(--trans);
+    position: relative;
+    overflow: hidden;
+  }
+  .highlight-card:last-child { border-right: none; }
+  .highlight-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 40px; right: 40px;
+    height: 2px;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .4s ease;
+  }
+  .highlight-card:hover::after { transform: scaleX(1); }
+
+  .highlight-card:hover { background: rgba(255,255,255,.03); }
+
+  .highlight-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--orange);
+    border: 1px solid rgba(242,92,30,.4);
+    padding: 5px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .highlight-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 14px;
+  }
+
+  .highlight-card p {
+    font-size: 14px;
+    color: rgba(255,255,255,.5);
+    line-height: 1.7;
+  }
+
+  .highlight-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 80px;
+    font-weight: 900;
+    color: rgba(255,255,255,.04);
+    position: absolute;
+    bottom: -10px;
+    right: 24px;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* ── ARTICLE GRID ─────────────────────────── */
+  .grid-articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 28px;
+  }
+
+  .article-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--trans);
+    display: flex;
+    flex-direction: column;
+  }
+  .article-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+  }
+
+  .article-card a { text-decoration: none; color: inherit; }
+
+  .article-thumb {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--cream-dark);
+    position: relative;
+  }
+  .article-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+    display: block;
+  }
+  .article-card:hover .article-thumb img { transform: scale(1.06); }
+
+  .article-body {
+    padding: 22px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .article-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink);
+    transition: color .25s;
+  }
+  .article-card:hover .article-body h3 { color: var(--orange); }
+
+  .article-body p {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .article-footer { padding: 0 24px 24px; }
+
+  /* ── ABOUT SECTION ────────────────────────── */
+  .about-section {
+    background: linear-gradient(135deg, var(--cream-dark) 0%, var(--cream) 100%);
+    border-top: 1px solid var(--border);
+  }
+
+  .about-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .about-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+  .about-text h2 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+  .about-text p {
+    font-size: 15.5px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .about-graphic {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .about-metric {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 28px 24px;
+    transition: var(--trans);
+  }
+  .about-metric:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--orange);
+  }
+  .about-metric:nth-child(2) { transform: translateY(20px); }
+  .about-metric:nth-child(2):hover { transform: translateY(16px); }
+  .about-metric:nth-child(4) { transform: translateY(20px); }
+  .about-metric:nth-child(4):hover { transform: translateY(16px); }
+
+  .about-metric .m-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .about-metric .m-num span { color: var(--orange); }
+  .about-metric .m-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  /* ── RESPONSIVE ───────────────────────────── */
+  @media (max-width: 900px) {
+    .hero-wrap { grid-template-columns: 1fr; gap: 40px; }
+    .hero-stats { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+    .hero-deco-text { font-size: 80px; opacity: .4; }
+    .highlight-grid { grid-template-columns: 1fr; }
+    .highlight-card { border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .highlight-card:last-child { border-bottom: none; }
+    .about-inner { grid-template-columns: 1fr; gap: 48px; }
+    .about-metric:nth-child(2),
+    .about-metric:nth-child(4) { transform: none; }
+    .about-metric:nth-child(2):hover,
+    .about-metric:nth-child(4):hover { transform: translateY(-4px); }
+  }
+
+  @media (max-width: 600px) {
+    .hero { min-height: auto; padding: 80px 0 60px; }
+    .hero-wrap { padding-top: 0; padding-bottom: 0; }
+    .section { padding: 56px 0; }
+    .hero h1 { font-size: 44px; }
+    .grid-products { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .grid-articles { grid-template-columns: 1fr; }
+    .section-head { flex-direction: column; align-items: flex-start; }
+    .highlight-card { padding: 36px 24px; }
+    .about-graphic { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 400px) {
+    .grid-products { grid-template-columns: 1fr; }
+  }
+</style>
+
 <body>
   <%- include("partials/header") %>
 
@@ -22,209 +780,289 @@
       .slice(0, 8);
   %>
 
+  <!-- ====== HERO ====== -->
   <section class="hero">
+    <div class="hero-noise"></div>
+    <div class="hero-deco-text">Belanja</div>
+
     <div class="container hero-wrap">
       <div class="hero-content">
-        <span class="badge">Rekomendasi Produk & Tips Belanja</span>
-        <h1>Teman Belanja</h1>
-
+        <span class="hero-eyebrow">Rekomendasi Produk &amp; Tips Belanja</span>
+        <h1>Teman<br><em>Belanja</em></h1>
         <p class="hero-desc">
-          Teman Belanja adalah tempat menemukan berbagai rekomendasi barang bagus,
-          review singkat produk, serta tips memilih barang yang tepat untuk kebutuhan
-          harian, rumah tangga, fashion, dan lainnya.
+          Tempat menemukan berbagai rekomendasi barang bagus,
+          review singkat produk, serta tips memilih barang yang tepat untuk
+          kebutuhan harian, rumah tangga, fashion, dan lainnya.
         </p>
-
         <div class="hero-actions">
-          <a class="btn primary" href="/produk">Lihat Rekomendasi Produk</a>
+          <a class="btn primary" href="/produk">Lihat Rekomendasi</a>
           <a class="btn ghost" href="/artikel">Baca Artikel</a>
         </div>
       </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat-card">
+          <div class="num"><span><%= safeProducts.length || "100" %></span>+</div>
+          <div class="lbl">Produk Pilihan</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="num"><span><%= safeArticles.length || "50" %></span>+</div>
+          <div class="lbl">Artikel &amp; Tips</div>
+        </div>
+        <div class="hero-float-badge">
+          Gratis &amp; Mudah Diakses
+        </div>
+      </div>
     </div>
   </section>
 
+  <!-- ====== KATEGORI POPULER ====== -->
   <% if (homeCategories.length > 0) { %>
-    <section class="section container" style="padding-top:28px;padding-bottom:10px;">
-      <div class="section-head" style="margin-bottom:14px;">
-        <div>
-          <h2>Kategori Populer</h2>
-          <p class="section-subtitle">Pilih kategori produk yang ingin kamu lihat lebih cepat</p>
+    <section class="cats-section">
+      <div class="container">
+        <div class="cats-header">
+          <div>
+            <p class="section-label">Jelajahi</p>
+            <h2 class="section-title" style="font-size:24px;">Kategori Populer</h2>
+          </div>
         </div>
-      </div>
-
-      <div style="display:flex;flex-wrap:wrap;gap:10px;">
-        <% homeCategories.forEach(([categoryName, total]) => { %>
-          <a
-            href="/produk?kategori=<%= encodeURIComponent(categoryName) %>"
-            class="pill"
-            style="text-decoration:none;"
-            aria-label="Lihat produk kategori <%= categoryName %>"
-          >
-            <%= categoryName %> (<%= total %>)
-          </a>
-        <% }) %>
+        <div class="cats-strip">
+          <% homeCategories.forEach(([categoryName, total]) => { %>
+            <a
+              href="/produk?kategori=<%= encodeURIComponent(categoryName) %>"
+              class="cat-pill"
+              aria-label="Lihat produk kategori <%= categoryName %>"
+            >
+              <%= categoryName %>
+              <span class="cat-count"><%= total %></span>
+            </a>
+          <% }) %>
+        </div>
       </div>
     </section>
   <% } %>
 
+  <!-- ====== PRODUK REKOMENDASI ====== -->
   <% if (safeProducts.length > 0) { %>
-    <section class="section container">
-      <div class="section-head">
-        <div>
-          <h2>Produk Rekomendasi</h2>
-          <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-label">Pilihan Terbaik</p>
+            <h2 class="section-title">Produk Rekomendasi</h2>
+            <p class="section-subtitle">Pilihan produk menarik yang sedang banyak dicari</p>
+          </div>
+          <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua &rarr;</a>
         </div>
-        <a href="/produk" class="pill" style="text-decoration:none;">Lihat semua</a>
-      </div>
 
-      <div class="grid-products">
-        <% safeProducts.slice(0, 8).forEach((product) => { %>
-          <%
-            const coverImage =
-              ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
-              "https://via.placeholder.com/800x800?text=Teman+Belanja";
-
-            const safeName = product.name || "Produk Pilihan";
-            const safeCategory = product.category || "";
-            const safeShortDesc = product.shortDesc || "";
-            const safeSuitableFor = product.suitableFor || "";
-          %>
-
-          <article class="card product-card">
-            <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
-              <div class="product-thumb-wrap" style="position:relative;">
-                <img
-                  src="<%= coverImage %>"
-                  alt="<%= safeName %>"
-                  loading="lazy"
-                />
-
-                <% if (product.isFeatured) { %>
-                  <span
-                    style="position:absolute;top:10px;left:10px;background:#ff6b00;color:#fff;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:2;"
-                  >
-                    Unggulan
-                  </span>
-                <% } %>
-              </div>
-
-              <div class="product-card-body">
-                <% if (safeCategory) { %>
-                  <span class="mini-category"><%= safeCategory %></span>
-                <% } %>
-
-                <h3><%= safeName %></h3>
-
-                <div class="mini-meta">
-                  <span>⭐ Produk</span>
-                  <span>•</span>
-                  <span>Pilihan</span>
-                  <% if (safeSuitableFor) { %>
-                    <span>•</span>
-                    <span><%= safeSuitableFor %></span>
+        <div class="grid-products">
+          <% safeProducts.slice(0, 8).forEach((product, i) => { %>
+            <%
+              const coverImage =
+                ((product.images && product.images.length > 0) ? product.images[0] : product.image) ||
+                "https://via.placeholder.com/800x800?text=Teman+Belanja";
+              const safeName = product.name || "Produk Pilihan";
+              const safeCategory = product.category || "";
+              const safeShortDesc = product.shortDesc || "";
+              const safeSuitableFor = product.suitableFor || "";
+            %>
+            <article class="product-card reveal" style="transition-delay:<%= i * 60 %>ms">
+              <a href="/produk/<%= product.slug %>" class="product-link" aria-label="Lihat detail <%= safeName %>">
+                <div class="product-thumb-wrap">
+                  <img src="<%= coverImage %>" alt="<%= safeName %>" loading="lazy" />
+                  <% if (product.isFeatured) { %>
+                    <span class="badge-featured">Unggulan</span>
                   <% } %>
                 </div>
-
-                <% if (safeShortDesc) { %>
-                  <p class="product-short"><%= safeShortDesc %></p>
-                <% } %>
-
-                <% if (product.price) { %>
-                  <p class="price"><%= formatRupiah(product.price) %></p>
-                <% } %>
+                <div class="product-card-body">
+                  <% if (safeCategory) { %>
+                    <span class="mini-category"><%= safeCategory %></span>
+                  <% } %>
+                  <h3><%= safeName %></h3>
+                  <div class="mini-meta">
+                    <span>Produk Pilihan</span>
+                    <% if (safeSuitableFor) { %>
+                      <span class="dot">&#8226;</span>
+                      <span><%= safeSuitableFor %></span>
+                    <% } %>
+                  </div>
+                  <% if (safeShortDesc) { %>
+                    <p class="product-short"><%= safeShortDesc %></p>
+                  <% } %>
+                  <% if (product.price) { %>
+                    <p class="price"><%= formatRupiah(product.price) %></p>
+                  <% } %>
+                </div>
+              </a>
+              <div class="card-footer">
+                <a class="btn primary full" href="/produk/<%= product.slug %>">Lihat Produk</a>
               </div>
-            </a>
-
-            <a class="btn primary full" href="/produk/<%= product.slug %>">
-              Lihat Produk
-            </a>
-          </article>
-        <% }) %>
+            </article>
+          <% }) %>
+        </div>
       </div>
     </section>
   <% } %>
 
-  <section class="section container">
-    <div class="home-highlight-grid">
-      <div class="home-highlight-card">
-        <span class="pill">Belanja Lebih Mudah</span>
+  <!-- ====== HIGHLIGHT / FITUR ====== -->
+  <section class="highlight-section section">
+    <div class="container">
+      <div class="section-head reveal" style="margin-bottom:52px;">
+        <div>
+          <p class="section-label" style="color:#FF8A5C;">Kenapa Teman Belanja</p>
+          <h2 class="section-title" style="color:#fff;">Semua yang Kamu Butuhkan<br>Ada di Sini</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-grid">
+      <div class="highlight-card reveal" style="transition-delay:0ms">
+        <span class="highlight-tag">Belanja Lebih Mudah</span>
         <h3>Produk Pilihan yang Sudah Dirangkum</h3>
-        <p>
-          Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu
-          menemukan produk menarik yang layak dicek lebih cepat.
-        </p>
+        <p>Tidak perlu bingung cari satu per satu. Teman Belanja membantu kamu menemukan produk menarik yang layak dicek lebih cepat.</p>
+        <span class="highlight-num">01</span>
       </div>
-
-      <div class="home-highlight-card">
-        <span class="pill">Link Produk</span>
-        <h3>Langsung Cek Harga & Detail</h3>
-        <p>
-          Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa
-          langsung melihat harga terbaru, varian, dan stok produk.
-        </p>
+      <div class="highlight-card reveal" style="transition-delay:80ms">
+        <span class="highlight-tag">Link Produk</span>
+        <h3>Langsung Cek Harga &amp; Detail</h3>
+        <p>Setiap rekomendasi dilengkapi tautan pembelian sehingga kamu bisa langsung melihat harga terbaru, varian, dan stok produk.</p>
+        <span class="highlight-num">02</span>
       </div>
-
-      <div class="home-highlight-card">
-        <span class="pill">Tips Belanja</span>
+      <div class="highlight-card reveal" style="transition-delay:160ms">
+        <span class="highlight-tag">Tips Belanja</span>
         <h3>Artikel Ringkas dan Mudah Dipahami</h3>
-        <p>
-          Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih
-          mudah menentukan pilihan yang cocok dengan kebutuhanmu.
-        </p>
+        <p>Selain produk, kamu juga bisa membaca artikel tips belanja supaya lebih mudah menentukan pilihan yang cocok dengan kebutuhanmu.</p>
+        <span class="highlight-num">03</span>
       </div>
     </div>
   </section>
 
+  <!-- ====== ARTIKEL TERBARU ====== -->
   <% if (safeArticles.length > 0) { %>
-    <section class="section container">
-      <div class="section-head">
-        <div>
-          <h2>Artikel Terbaru</h2>
-          <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-label">Wawasan &amp; Tips</p>
+            <h2 class="section-title">Artikel Terbaru</h2>
+            <p class="section-subtitle">Baca tips dan rekomendasi terbaru dari Teman Belanja</p>
+          </div>
+          <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua &rarr;</a>
         </div>
-        <a href="/artikel" class="pill" style="text-decoration:none;">Lihat semua</a>
-      </div>
 
-      <div class="grid-articles">
-        <% safeArticles.slice(0, 6).forEach((article) => { %>
-          <article class="card article-card">
-            <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= article.title %>">
-              <img
-                src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
-                alt="<%= article.title %>"
-                loading="lazy"
-              />
-              <h3><%= article.title %></h3>
-            </a>
-
-            <% if (article.excerpt) { %>
-              <p><%= article.excerpt %></p>
-            <% } %>
-
-            <a class="btn ghost full" href="/artikel/<%= article.slug %>">
-              Baca Artikel
-            </a>
-          </article>
-        <% }) %>
+        <div class="grid-articles">
+          <% safeArticles.slice(0, 6).forEach((article, i) => { %>
+            <article class="article-card reveal" style="transition-delay:<%= i * 80 %>ms">
+              <a href="/artikel/<%= article.slug %>" aria-label="Baca artikel <%= article.title %>">
+                <div class="article-thumb">
+                  <img
+                    src="<%= article.cover || 'https://via.placeholder.com/800x450?text=Teman+Belanja' %>"
+                    alt="<%= article.title %>"
+                    loading="lazy"
+                  />
+                </div>
+              </a>
+              <div class="article-body">
+                <a href="/artikel/<%= article.slug %>" style="text-decoration:none;">
+                  <h3><%= article.title %></h3>
+                </a>
+                <% if (article.excerpt) { %>
+                  <p><%= article.excerpt %></p>
+                <% } %>
+              </div>
+              <div class="article-footer">
+                <a class="btn ghost-dark full" href="/artikel/<%= article.slug %>">Baca Artikel &rarr;</a>
+              </div>
+            </article>
+          <% }) %>
+        </div>
       </div>
     </section>
   <% } %>
 
-  <section class="section container">
-    <div class="site-info">
-      <h2>Tentang Teman Belanja</h2>
-      <p>
-        Teman Belanja membantu kamu menemukan berbagai barang menarik
-        yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
-        pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
-      </p>
-      <p>
-        Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
-        pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
-        dengan lebih mudah.
-      </p>
+  <!-- ====== TENTANG ====== -->
+  <section class="about-section section">
+    <div class="container">
+      <div class="about-inner">
+        <div class="about-text reveal">
+          <p class="section-label">Tentang Kami</p>
+          <h2>Teman <em>Terpercaya</em><br>untuk Belanja Kamu</h2>
+          <p>
+            Teman Belanja membantu kamu menemukan berbagai barang menarik
+            yang berguna untuk kebutuhan sehari-hari. Kami merangkum produk
+            pilihan yang banyak dicari serta artikel tips belanja yang mudah dipahami.
+          </p>
+          <p>
+            Semua rekomendasi disusun berdasarkan fungsi, kegunaan, dan
+            pengalaman pengguna sehingga kamu bisa menemukan barang yang tepat
+            dengan lebih mudah.
+          </p>
+          <div style="margin-top:28px;">
+            <a class="btn primary" href="/produk">Mulai Jelajahi</a>
+          </div>
+        </div>
+
+        <div class="about-graphic reveal" style="transition-delay:150ms">
+          <div class="about-metric">
+            <div class="m-num"><span><%= safeProducts.length || "100" %></span>+</div>
+            <div class="m-label">Produk Pilihan</div>
+          </div>
+          <div class="about-metric">
+            <div class="m-num"><span><%= safeArticles.length || "50" %></span>+</div>
+            <div class="m-label">Artikel Tips</div>
+          </div>
+          <div class="about-metric">
+            <div class="m-num"><span><%= homeCategories.length || "8" %></span>+</div>
+            <div class="m-label">Kategori</div>
+          </div>
+          <div class="about-metric">
+            <div class="m-num"><span>0</span></div>
+            <div class="m-label">Biaya Akses</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <%- include("partials/footer") %>
+
+  <script>
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    // Hero entrance
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroContent = document.querySelector('.hero-content');
+      const heroStats   = document.querySelector('.hero-stats');
+      if (heroContent) {
+        heroContent.style.opacity = '0';
+        heroContent.style.transform = 'translateY(30px)';
+        heroContent.style.transition = 'opacity .8s ease .1s, transform .8s ease .1s';
+        setTimeout(() => {
+          heroContent.style.opacity = '1';
+          heroContent.style.transform = 'none';
+        }, 50);
+      }
+      if (heroStats) {
+        heroStats.style.opacity = '0';
+        heroStats.style.transform = 'translateY(30px)';
+        heroStats.style.transition = 'opacity .8s ease .35s, transform .8s ease .35s';
+        setTimeout(() => {
+          heroStats.style.opacity = '1';
+          heroStats.style.transform = 'none';
+        }, 50);
+      }
+    });
+  </script>
 </body>
 </html>
