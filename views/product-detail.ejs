@@ -6,21 +6,24 @@
   <%- include("partials/header") %>
 
   <%
-    const mediaImages = Array.isArray(product.images) && product.images.length
-      ? product.images.filter(Boolean)
-      : [product.image || "https://via.placeholder.com/800x800?text=Teman+Belanja"];
+    const safeProduct = product || {};
+    const safeName = safeProduct.name || "Produk Pilihan";
+    const safeCategory = safeProduct.category || "Produk";
+    const safeCategorySlug = safeProduct.categorySlug || "";
+    const categoryUrl = safeCategorySlug ? `/kategori/${safeCategorySlug}` : "/produk";
 
-    const productVideos = Array.isArray(product.videos) ? product.videos.filter(Boolean) : [];
-    const hasVideo = productVideos.length > 0;
+    const mediaImages = Array.isArray(safeProduct.images) && safeProduct.images.length
+      ? safeProduct.images.filter(Boolean)
+      : [safeProduct.image || "https://via.placeholder.com/800x800?text=Teman+Belanja"];
 
-    const safeCategory = product.category || "Produk Pilihan";
-    const safeDesc = product.desc || "Produk ini direkomendasikan karena kualitasnya baik dan layak dipertimbangkan.";
-    const safeShortDesc = product.shortDesc || "";
-    const safeSuitableFor = product.suitableFor || "";
-    const categoryUrl = product.categorySlug ? `/kategori/${product.categorySlug}` : "/produk";
+    const safeShortDesc = safeProduct.shortDesc || "";
+    const safeDesc = safeProduct.desc || "Produk ini layak dipertimbangkan untuk kebutuhan kamu.";
+    const safeSuitableFor = safeProduct.suitableFor || "";
     const safePrice = typeof formatRupiah === "function"
-      ? formatRupiah(product.price || 0)
-      : ("Rp " + Number(product.price || 0).toLocaleString("id-ID"));
+      ? formatRupiah(safeProduct.price || 0)
+      : ("Rp " + Number(safeProduct.price || 0).toLocaleString("id-ID"));
+
+    const hasAffiliate = Boolean(safeProduct.affiliateUrl || safeProduct.sourceUrl);
   %>
 
   <section class="section container product-detail-page">
@@ -28,12 +31,12 @@
       <a href="/">Beranda</a>
       <span>/</span>
       <a href="/produk">Produk</a>
-      <% if (product.categorySlug) { %>
+      <% if (safeCategorySlug) { %>
         <span>/</span>
         <a href="<%= categoryUrl %>"><%= safeCategory %></a>
       <% } %>
       <span>/</span>
-      <span><%= product.name %></span>
+      <span><%= safeName %></span>
     </nav>
 
     <div class="product-detail-grid">
@@ -43,37 +46,26 @@
             <img
               id="mainPreview"
               src="<%= mediaImages[0] %>"
-              alt="<%= product.name %> - <%= safeCategory %>"
+              alt="<%= safeName %>"
               loading="lazy"
               onclick="openLightboxFromMain()"
             />
           </div>
 
-          <% if (mediaImages.length > 1 || hasVideo) { %>
+          <% if (mediaImages.length > 1) { %>
             <div class="thumb-list">
               <% mediaImages.forEach((img, index) => { %>
                 <button
                   type="button"
                   class="thumb-btn <%= index === 0 ? 'active' : '' %>"
-                  onclick='changePreview(<%- JSON.stringify(img) %>, "image", <%= index %>, this)'
-                  aria-label="Lihat gambar <%= index + 1 %> <%= product.name %>"
+                  onclick='changePreview(<%- JSON.stringify(img) %>, <%= index %>, this)'
+                  aria-label="Lihat gambar <%= index + 1 %> <%= safeName %>"
                 >
                   <img
                     src="<%= img %>"
-                    alt="Gambar <%= index + 1 %> <%= product.name %>"
+                    alt="Gambar <%= index + 1 %> <%= safeName %>"
                     loading="lazy"
                   />
-                </button>
-              <% }) %>
-
-              <% productVideos.forEach((video, index) => { %>
-                <button
-                  type="button"
-                  class="thumb-btn video-thumb"
-                  onclick='changePreview(<%- JSON.stringify(video) %>, "video", <%= index %>, this)'
-                  aria-label="Lihat video produk <%= product.name %>"
-                >
-                  <span>VIDEO</span>
                 </button>
               <% }) %>
             </div>
@@ -85,24 +77,15 @@
         <div class="product-info">
           <div class="product-top-meta">
             <a href="<%= categoryUrl %>" class="pill"><%= safeCategory %></a>
-            <span class="trust-badge">Produk Pilihan</span>
           </div>
 
-          <h1 class="product-title"><%= product.name %></h1>
-
-          <div class="product-meta-row">
-            <span class="meta-rating">⭐ Rekomendasi Teman Belanja</span>
-            <span class="meta-divider">•</span>
-            <span class="meta-sales">Siap Dicek</span>
-            <span class="meta-divider">•</span>
-            <span class="meta-stock">Link Aman</span>
-          </div>
-
-          <p class="price big"><%= safePrice %></p>
+          <h1 class="product-title"><%= safeName %></h1>
 
           <% if (safeShortDesc) { %>
             <p class="short-desc"><%= safeShortDesc %></p>
           <% } %>
+
+          <p class="price big"><%= safePrice %></p>
 
           <div class="quick-info-grid">
             <div class="quick-info-item">
@@ -118,35 +101,25 @@
             <% } %>
 
             <div class="quick-info-item">
-              <span class="label">Pembelian</span>
-              <strong>Online / COD </strong>
-            </div>
-
-            <div class="quick-info-item">
               <span class="label">Status</span>
-              <strong>READY SIAP KIRIM</strong>
+              <strong>Ready</strong>
             </div>
           </div>
 
           <div class="trust-points">
-            <span>✅ Link aman</span>
             <span>✅ Produk pilihan</span>
-            <span>✅ Bisa dibantu admin</span>
+            <span>✅ Link aman</span>
           </div>
 
-          <p class="cta-note">
-            Cek detail, harga terbaru, varian, dan ketersediaan produk melalui tombol di bawah ini.
-          </p>
-
           <div class="buy-buttons">
-            <% if (product.affiliateUrl || product.sourceUrl) { %>
+            <% if (hasAffiliate) { %>
               <a
                 class="btn-buy-main"
                 target="_blank"
                 rel="nofollow sponsored"
-                href="/go/<%= product.id %>"
+                href="/go/<%= safeProduct.id %>"
               >
-                🛒 Beli di Shopee
+                🛒 Beli Sekarang
               </a>
             <% } %>
 
@@ -154,9 +127,9 @@
               class="btn-buy-admin"
               target="_blank"
               rel="noopener noreferrer"
-              href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
+              href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + safeProduct.slug) %>"
             >
-              💬 Minta Bantu Checkout
+              💬 Tanya Admin
             </a>
           </div>
 
@@ -165,23 +138,23 @@
             <p><%= safeDesc %></p>
           </div>
 
-          <% if (product.benefits && product.benefits.length) { %>
-            <div class="product-benefits info-box">
+          <% if (safeProduct.benefits && safeProduct.benefits.length) { %>
+            <div class="info-box">
               <h3>Kelebihan Produk</h3>
               <ul>
-                <% product.benefits.forEach((b) => { %>
-                  <li><%= b %></li>
+                <% safeProduct.benefits.forEach((item) => { %>
+                  <li><%= item %></li>
                 <% }) %>
               </ul>
             </div>
           <% } %>
 
-          <% if (product.specs && product.specs.length) { %>
-            <div class="product-specs info-box">
+          <% if (safeProduct.specs && safeProduct.specs.length) { %>
+            <div class="info-box">
               <h3>Spesifikasi</h3>
               <ul>
-                <% product.specs.forEach((s) => { %>
-                  <li><%= s %></li>
+                <% safeProduct.specs.forEach((item) => { %>
+                  <li><%= item %></li>
                 <% }) %>
               </ul>
             </div>
@@ -190,8 +163,7 @@
           <div class="info-box">
             <h3>Lihat Kategori Serupa</h3>
             <p style="margin:0 0 14px;color:#555;line-height:1.8;">
-              Jelajahi lebih banyak produk dalam kategori <strong><%= safeCategory %></strong>
-              untuk menemukan pilihan lain yang sesuai dengan kebutuhan dan budget kamu.
+              Jelajahi lebih banyak produk dalam kategori <strong><%= safeCategory %></strong>.
             </p>
             <a href="<%= categoryUrl %>" class="btn ghost">Lihat Semua <%= safeCategory %></a>
           </div>
@@ -205,7 +177,7 @@
       <div class="section-head">
         <div>
           <h2>Produk Serupa</h2>
-          <p class="section-subtitle">Pilihan lain yang masih satu gaya dan layak kamu cek</p>
+          <p class="section-subtitle">Pilihan lain yang masih relevan untuk kamu cek</p>
         </div>
       </div>
 
@@ -237,12 +209,6 @@
 
                 <h3><%= item.name %></h3>
 
-                <div class="mini-meta">
-                  <span>⭐ Pilihan</span>
-                  <span>•</span>
-                  <span>Rekomendasi</span>
-                </div>
-
                 <% if (item.shortDesc) { %>
                   <p class="product-short"><%= item.shortDesc %></p>
                 <% } %>
@@ -268,12 +234,12 @@
       </div>
 
       <div class="mobile-buy-actions">
-        <% if (product.affiliateUrl || product.sourceUrl) { %>
+        <% if (hasAffiliate) { %>
           <a
             class="mobile-buy-btn primary"
             target="_blank"
             rel="nofollow sponsored"
-            href="/go/<%= product.id %>"
+            href="/go/<%= safeProduct.id %>"
           >
             Beli
           </a>
@@ -283,7 +249,7 @@
           class="mobile-buy-btn secondary"
           target="_blank"
           rel="noopener noreferrer"
-          href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20checkout%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + product.slug) %>"
+          href="https://wa.me/6285383481491?text=Halo%20admin%2C%20saya%20ingin%20dibantu%20produk%20ini%3A%20<%= encodeURIComponent(BASE_URL + '/produk/' + safeProduct.slug) %>"
         >
           Admin
         </a>
@@ -296,12 +262,6 @@
     <button class="lightbox-nav lightbox-prev" type="button" onclick="prevImage(event)">❮</button>
     <button class="lightbox-nav lightbox-next" type="button" onclick="nextImage(event)">❯</button>
 
-    <div class="lightbox-toolbar" onclick="event.stopPropagation()">
-      <button type="button" class="lightbox-tool-btn" onclick="zoomOut(event)">－</button>
-      <button type="button" class="lightbox-tool-btn" onclick="resetZoom(event)">100%</button>
-      <button type="button" class="lightbox-tool-btn" onclick="zoomIn(event)">＋</button>
-    </div>
-
     <div class="lightbox-content" onclick="event.stopPropagation()">
       <img id="lightboxImage" src="" alt="Preview Besar Produk">
     </div>
@@ -310,30 +270,19 @@
   <script>
     const galleryImages = <%- JSON.stringify(mediaImages || []) %>;
     let currentImageIndex = 0;
-    let currentScale = 1;
 
     function clearActiveThumb() {
       document.querySelectorAll(".thumb-btn").forEach((btn) => btn.classList.remove("active"));
     }
 
-    function changePreview(src, type, index = 0, el = null) {
+    function changePreview(src, index = 0, el = null) {
       const container = document.querySelector(".main-media");
       if (!container) return;
 
+      currentImageIndex = index;
       clearActiveThumb();
       if (el) el.classList.add("active");
 
-      if (type === "video") {
-        container.innerHTML = `
-          <video controls playsinline class="main-preview-video">
-            <source src="${src}">
-            Browser tidak mendukung video
-          </video>
-        `;
-        return;
-      }
-
-      currentImageIndex = index;
       container.innerHTML = `
         <img
           id="mainPreview"
@@ -365,9 +314,6 @@
       if (!lightbox || !lightboxImage || !galleryImages.length) return;
 
       lightboxImage.src = galleryImages[currentImageIndex] || galleryImages[0];
-      currentScale = 1;
-      updateZoom();
-
       lightbox.classList.add("show");
       document.body.style.overflow = "hidden";
     }
@@ -380,7 +326,6 @@
 
       lightbox.classList.remove("show");
       document.body.style.overflow = "";
-      currentScale = 1;
     }
 
     function updateLightboxImage() {
@@ -388,8 +333,6 @@
       if (!lightboxImage || !galleryImages.length) return;
 
       lightboxImage.src = galleryImages[currentImageIndex];
-      currentScale = 1;
-      updateZoom();
     }
 
     function prevImage(event) {
@@ -408,30 +351,6 @@
       updateLightboxImage();
     }
 
-    function zoomIn(event) {
-      if (event) event.stopPropagation();
-      currentScale = Math.min(currentScale + 0.2, 3);
-      updateZoom();
-    }
-
-    function zoomOut(event) {
-      if (event) event.stopPropagation();
-      currentScale = Math.max(currentScale - 0.2, 0.6);
-      updateZoom();
-    }
-
-    function resetZoom(event) {
-      if (event) event.stopPropagation();
-      currentScale = 1;
-      updateZoom();
-    }
-
-    function updateZoom() {
-      const lightboxImage = document.getElementById("lightboxImage");
-      if (!lightboxImage) return;
-      lightboxImage.style.transform = `scale(${currentScale})`;
-    }
-
     document.addEventListener("keydown", function (e) {
       const lightbox = document.getElementById("imageLightbox");
       const isOpen = lightbox && lightbox.classList.contains("show");
@@ -441,9 +360,6 @@
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowLeft") prevImage();
       if (e.key === "ArrowRight") nextImage();
-      if (e.key === "+" || e.key === "=") zoomIn();
-      if (e.key === "-") zoomOut();
-      if (e.key === "0") resetZoom();
     });
   </script>
 
@@ -451,9 +367,9 @@
     <%- JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Product",
-      name: product.name,
+      name: safeName,
       image: mediaImages,
-      description: safeDesc || safeShortDesc || product.name,
+      description: safeDesc || safeShortDesc || safeName,
       category: safeCategory,
       brand: {
         "@type": "Brand",
@@ -462,9 +378,9 @@
       offers: {
         "@type": "Offer",
         priceCurrency: "IDR",
-        price: String(product.price || 0),
+        price: String(safeProduct.price || 0),
         availability: "https://schema.org/InStock",
-        url: `${BASE_URL}/produk/${product.slug}`
+        url: `${BASE_URL}/produk/${safeProduct.slug || ''}`
       }
     }) %>
   </script>
